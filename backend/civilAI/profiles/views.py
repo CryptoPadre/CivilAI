@@ -18,18 +18,8 @@ class ProfileList(generics.ListAPIView):
     List all profiles.
     No create view as profile creation is handled by django signals.
     """
-    queryset = Profile.objects.annotate(
-        posts_count=Count('owner', distinct=True)
-    ).order_by('owner')
+    queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
-    filter_backends = [
-        filters.OrderingFilter,
-        filters.SearchFilter,
-        DjangoFilterBackend,
-    ]
-    filterset_fields = [
-        'owner',
-    ]
     search_fields = [
         'owner__username'
     ]
