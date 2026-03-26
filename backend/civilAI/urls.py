@@ -27,6 +27,5 @@ urlpatterns = [
     path(
         'api/dj-rest-auth/registration/', include('dj_rest_auth.registration.urls')
     ),
-    path('api/', include('civilAI.profiles.urls')),
-    ## path('api/', include('civilAI.npc.urls'))
+    path('api/', include('civilAI.npc.urls'))
     ]
