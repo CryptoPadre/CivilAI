@@ -1,5 +1,6 @@
 from django.db import models
 import random
+from django.utils import timezone
 
 
 class Npc(models.Model):
@@ -57,23 +58,38 @@ class Npc(models.Model):
     sex = models.CharField(max_length=1, choices=SEX_CHOICES)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
-    age = models.IntegerField()
-    personality = models.CharField(max_length=55)  # either good or bad trait
+    age = models.IntegerField(default=0) 
+    personality = models.CharField(max_length=55) 
+    created_at = models.DateTimeField(default=timezone.now)
+    initial_age = models.IntegerField(default=0)  
 
     def save(self, *args, **kwargs):
-        if not self.age:
-            self.age = random.randint(18, 60)
+        # assign random initial values if missing
         if not self.sex:
             self.sex = random.choice(['M', 'F'])
-        if self.sex == 'M':
-            self.first_name = random.choice(self.MALE_FIRST_NAMES)
-        else:
-            self.first_name = random.choice(self.FEMALE_FIRST_NAMES)
-        self.last_name = random.choice(self.LAST_NAMES)
 
-        # Pick a personality: choose an index, then pick good or bad
-        idx = random.randint(0, len(self.PERSONALITY_GOOD)-1)
-        self.personality = random.choice([self.PERSONALITY_GOOD[idx], self.PERSONALITY_BAD[idx]])
+        if not self.first_name:
+            self.first_name = random.choice(
+                self.MALE_FIRST_NAMES if self.sex == 'M' else self.FEMALE_FIRST_NAMES
+            )
+
+        if not self.last_name:
+            self.last_name = random.choice(self.LAST_NAMES)
+
+        if not self.personality:
+            idx = random.randint(0, len(self.PERSONALITY_GOOD) - 1)
+            self.personality = random.choice([
+                self.PERSONALITY_GOOD[idx],
+                self.PERSONALITY_BAD[idx]
+            ])
+
+        if not self.pk:  
+            self.initial_age = random.randint(10, 60)
+            self.age = self.initial_age
+
+        if self.created_at:
+            delta = timezone.now() - self.created_at
+            self.age = self.initial_age + int(delta.total_seconds() // 60)
 
         super().save(*args, **kwargs)
 

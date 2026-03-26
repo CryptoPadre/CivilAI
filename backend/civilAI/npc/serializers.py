@@ -12,5 +12,5 @@ class NpcSerializer(serializers.ModelSerializer):
     class Meta:
         model = Npc
         fields = [
-            'sex', 'first_name', 'last_name', 'age', 'personality'
+            'sex', 'first_name', 'last_name', 'age', 'personality','created_at'
             ]
