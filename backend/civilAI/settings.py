@@ -68,7 +68,7 @@ MIDDLEWARE = [
 ]
 
 CRONJOBS = [
-    ('*/1 * * * *', 'django.core.management.call_command', ['update_age']),
+    ('*/1 * * * *', '/Users/tamasgavlider/Desktop/CivilAI/CivilAI/backend/venv/bin/python /Users/tamasgavlider/Desktop/CivilAI/CivilAI/backend/manage.py update_age'),
 ]
 
 REST_FRAMEWORK = {
