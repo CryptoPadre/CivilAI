@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "rest_framework",
     'dj_rest_auth',
     'rest_framework.authtoken',
+    'django_crontab',
     'allauth',
     'allauth.account',  
     'allauth.socialaccount',
@@ -64,6 +65,10 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware'
+]
+
+CRONJOBS = [
+    ('*/1 * * * *', 'django.core.management.call_command', ['update_age']),
 ]
 
 REST_FRAMEWORK = {

@@ -1,4 +1,3 @@
-# npc/management/commands/update_npc_age.py
 
 from django.core.management.base import BaseCommand
 from django.utils import timezone
@@ -12,7 +11,7 @@ class Command(BaseCommand):
 
         for npc in Npc.objects.all():
             delta = now - npc.created_at
-            npc.age = npc.initial_age + int(delta.total_seconds() // 60)
+            npc.age = npc.initial_age + int(delta.total_seconds() // 6)
             npc.save(update_fields=['age'])
 
         self.stdout.write("NPC ages updated")

@@ -5,6 +5,15 @@ from django.utils import timezone
 
 class Npc(models.Model):
     SEX_CHOICES = [('M','Male'),('F','Female')]
+    
+    FERTILITY_RATE = [('H',"High"), ('N',"Normal"), ('L',"Low")]
+    
+    ORIENTATION_CHOICES = [
+        ('hetero', 'Heterosexual'),
+        ('gay', 'Gay'),
+        ('bi', 'Bisexual'),
+        ('other', 'Other'),
+    ]
 
     MALE_FIRST_NAMES = [
         "Adam", "Mateusz", "Lukasz", "Jakub", "Kacper",
@@ -62,6 +71,12 @@ class Npc(models.Model):
     personality = models.CharField(max_length=55) 
     created_at = models.DateTimeField(default=timezone.now)
     initial_age = models.IntegerField(default=0)  
+    fertility = models.CharField(max_length=6, choices=FERTILITY_RATE)
+    sexual_orientation = models.CharField(
+        max_length=10,
+        choices=ORIENTATION_CHOICES,
+        default='hetero'
+    )
 
     def save(self, *args, **kwargs):
         # assign random initial values if missing
