@@ -77,6 +77,8 @@ class Npc(models.Model):
         choices=ORIENTATION_CHOICES,
         default='hetero'
     )
+    latitude = models.FloatField(default=49.2992)
+    longitude = models.FloatField(default=19.9496)
 
     def save(self, *args, **kwargs):
         # assign random initial values if missing
