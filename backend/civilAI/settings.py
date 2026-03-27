@@ -68,7 +68,7 @@ MIDDLEWARE = [
 ]
 
 CRONJOBS = [
-    ('*/1 * * * *', '/Users/tamasgavlider/Desktop/CivilAI/CivilAI/backend/venv/bin/python /Users/tamasgavlider/Desktop/CivilAI/CivilAI/backend/manage.py update_age'),
+    ('*/2 * * * *', '/Users/tamasgavlider/Desktop/CivilAI/CivilAI/backend/venv/bin/python /Users/tamasgavlider/Desktop/CivilAI/CivilAI/backend/manage.py update_age'),
 ]
 
 REST_FRAMEWORK = {
