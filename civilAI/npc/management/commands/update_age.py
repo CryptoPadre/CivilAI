@@ -15,3 +15,5 @@ class Command(BaseCommand):
             npc.save(update_fields=['age'])
 
         self.stdout.write("NPC ages updated")
+        
+

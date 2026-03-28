@@ -70,13 +70,14 @@ class Npc(models.Model):
     age = models.IntegerField(default=0) 
     personality = models.CharField(max_length=55) 
     created_at = models.DateTimeField(default=timezone.now)
-    initial_age = models.IntegerField(default=0)  
+    initial_age = models.IntegerField()  
     fertility = models.CharField(max_length=6, choices=FERTILITY_RATE)
     sexual_orientation = models.CharField(
         max_length=10,
         choices=ORIENTATION_CHOICES,
         default='hetero'
     )
+    fitness_level = models.IntegerField(default=0)
     latitude = models.FloatField(default=49.2992)
     longitude = models.FloatField(default=19.9496)
 
@@ -104,6 +105,9 @@ class Npc(models.Model):
             self.initial_age = random.randint(10, 60)
             self.age = self.initial_age
 
+        if not self.fitness_level:
+            self.fitness_level = random.randint(0, 11)
+        
         if self.created_at:
             delta = timezone.now() - self.created_at
             self.age = self.initial_age + int(delta.total_seconds() // 60)
