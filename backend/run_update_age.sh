@@ -1,13 +1,13 @@
 #!/bin/bash
 
-# Path to your virtual environment
-VENV="/Users/tamasgavlider/Desktop/CivilAI/CivilAI/backend/venv"
+# Activate virtual environment
+source /Users/tamasgavlider/Desktop/CivilAI/CivilAI/backend/venv/bin/activate
 
-# Activate the virtual environment
-source "$VENV/bin/activate"
-
-# Navigate to your Django project directory
+# Navigate to Django project
 cd /Users/tamasgavlider/Desktop/CivilAI/CivilAI/backend
 
-# Run the management command
+# Set Django settings module explicitly
+export DJANGO_SETTINGS_MODULE="backend.settings"
+
+# Run management command and log output
 python manage.py update_age >> /tmp/update_age.log 2>&1

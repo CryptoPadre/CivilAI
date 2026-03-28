@@ -64,9 +64,8 @@ MIDDLEWARE = [
 ]
 
 CRONJOBS = [
-    ('*/2 * * * *', '/Users/tamasgavlider/Desktop/CivilAI/CivilAI/backend/venv/bin/python /Users/tamasgavlider/Desktop/CivilAI/CivilAI/backend/manage.py update_age'),
+    ('*/2 * * * *', '/Users/tamasgavlider/Desktop/CivilAI/CivilAI/backend/run_update_age.sh'),
 ]
-
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
