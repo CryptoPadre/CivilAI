@@ -1,13 +1,16 @@
 #!/bin/bash
 
-# Activate virtual environment
-source /Users/tamasgavlider/Desktop/CivilAI/CivilAI/backend/venv/bin/activate
+# go to script directory (optional if already running from backend)
+cd "$(dirname "$0")"
 
-# Navigate to Django project
-cd /Users/tamasgavlider/Desktop/CivilAI/CivilAI/backend
+# correct DATABASE_URL with quotes
+export DATABASE_URL="postgresql://neondb_owner:npg_DCmdoQ8PO0pL@ep-crimson-resonance-amjq27sj-pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
 
-# Set Django settings module explicitly
-export DJANGO_SETTINGS_MODULE="backend.settings"
+# Django settings module
+export DJANGO_SETTINGS_MODULE=civilAI.settings
 
-# Run management command and log output
+# activate virtual environment
+source venv/bin/activate
+
+# run the command and log output
 python manage.py update_age >> /tmp/update_age.log 2>&1
