@@ -14,9 +14,9 @@ const app = () => {
     <View style={styles.container}>
       <ImageBackground source={bgImage} resizeMode="cover" style={styles.image}>
         <Text style={styles.text}>CivilAI</Text>
-        <Link href="/explore" style={{ marginHorizontal: "auto" }} asChild>
+        <Link href="/login" style={{ marginHorizontal: "auto" }} asChild>
           <Pressable style={styles.button}>
-            <Text style={styles.buttonText}>Explore</Text>
+            <Text style={styles.buttonText}>Login</Text>
           </Pressable>
         </Link>
       </ImageBackground>
