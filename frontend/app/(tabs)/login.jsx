@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -10,31 +10,50 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { useState } from "react";
+import { useRouter } from "expo-router";
+import { useAuth } from "../../assets/context/AuthContext";
 
 export default function Login() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [signInData, setSignInData] = useState({
+    username: "",
+    password: "",
+  });
+
+  const { username, password } = signInData;
   const [errors, setErrors] = useState({});
 
-  const validateForm = () => {
-    let errors = {};
+  const router = useRouter();
+  const { login } = useAuth();
 
-    if (!username) errors.username = "Username is required";
-    if (!password) errors.password = "Password is required";
+  const validateField = (name, value) => {
+    setErrors((prev) => {
+      const newErrors = { ...prev };
 
-    setErrors(errors);
-    return Object.keys(errors).length === 0;
+      if (name === "username" && !value.trim()) {
+        newErrors.username = ["Username cannot be empty."];
+      } else {
+        delete newErrors.username;
+      }
+
+      if (name === "password" && value.length < 8) {
+        newErrors.password = ["Min 8 characters."];
+      } else {
+        delete newErrors.password;
+      }
+
+      return newErrors;
+    });
   };
 
-  const handleSubmit = () => {
-    if (validateForm()) {
-      console.log("Submitted", username, password);
-      setUsername("");
-      setPassword("");
-      setErrors({});
+  const handleSubmit = async () => {
+    try {
+      await login(username, password);
+      router.replace("/map");
+    } catch (err) {
+      setErrors({ general: ["Invalid credentials"] });
     }
   };
+
   return (
     <KeyboardAvoidingView
       behavior="padding"
@@ -44,33 +63,31 @@ export default function Login() {
       <Image
         source={require("@/assets/images/loginimg.png")}
         style={styles.image}
-      ></Image>
+      />
 
-      {/* Username */}
       <TextInput
         style={styles.input}
         placeholder="Username"
         value={username}
-        onChangeText={setUsername}
+        onChangeText={(text) => {
+          setSignInData((prev) => ({ ...prev, username: text }));
+          validateField("username", text);
+        }}
       />
-      {errors.username ? (
-        <Text style={styles.errorText}>{errors.username}</Text>
-      ) : null}
 
-      {/* Password */}
       <TextInput
         style={styles.input}
         placeholder="Password"
         secureTextEntry
         value={password}
-        onChangeText={setPassword}
+        onChangeText={(text) => {
+          setSignInData((prev) => ({ ...prev, password: text }));
+          validateField("password", text);
+        }}
       />
-      {errors.password ? (
-        <Text style={styles.errorText}>{errors.password}</Text>
-      ) : null}
-      {/* Button */}
+
       <Button title="Login" onPress={handleSubmit} />
-      {/* Link */}
+
       <TouchableOpacity>
         <Text style={styles.link}>Don’t have an account? Sign up now!</Text>
       </TouchableOpacity>

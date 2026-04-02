@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
+    'corsheaders',
     "rest_framework",
     'dj_rest_auth',
     'rest_framework.authtoken',
@@ -53,6 +54,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -66,16 +68,17 @@ MIDDLEWARE = [
 
 
 REST_FRAMEWORK = {
-    # Use Django's standard `django.contrib.auth` permissions,
-    # or allow read-only access for unauthenticated users.
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly"
-    ]
-}
-
-REST_FRAMEWORK = {
+    ],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 10,
+}
+
+REST_AUTH = {
+    "SESSION_COOKIE_SAMESITE": None,
+    "SESSION_COOKIE_SECURE": True,
+    "CSRF_COOKIE_SECURE": True,
 }
 
 ROOT_URLCONF = 'civilAI.urls'
@@ -97,7 +100,16 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'civilAI.wsgi.application'
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8081",
+]
 
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOW_CREDENTIALS = True
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8081",
+]
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 """
