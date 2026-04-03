@@ -5,6 +5,7 @@ import {
   Button,
   StyleSheet,
   Image,
+  TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
@@ -86,6 +87,10 @@ export default function Login() {
         }}
       />
       <Button title="Login" onPress={handleSubmit} />
+
+      <TouchableOpacity onPress={() => router.replace("/register")}>
+        <Text style={styles.link}>Don't have an account? Register</Text>
+      </TouchableOpacity>
     </KeyboardAvoidingView>
   );
 }
@@ -106,6 +111,11 @@ const styles = StyleSheet.create({
     textAlign: "center",
     backgroundColor: "green",
     color: "white",
+  },
+  link: {
+    marginTop: 20,
+    textAlign: "center",
+    color: "green",
   },
   errorText: { marginBottom: 10, color: "red", textAlign: "center" },
   image: { width: 200, height: 400, alignSelf: "center", marginBottom: 50 },
