@@ -1,55 +1,54 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  View,
   Text,
   TextInput,
   Button,
-  TouchableOpacity,
   StyleSheet,
   Image,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { useRouter } from "expo-router";
 import { useAuth } from "../../assets/context/AuthContext";
+import { useRouter } from "expo-router";
 
 export default function Login() {
-  const [signInData, setSignInData] = useState({
-    username: "",
-    password: "",
-  });
-
+  const [signInData, setSignInData] = useState({ username: "", password: "" });
   const { username, password } = signInData;
   const [errors, setErrors] = useState({});
 
+  const { login, user } = useAuth();
   const router = useRouter();
-  const { login } = useAuth();
+  // Redirect logged-in user to main page automatically
+  useEffect(() => {
+    if (user) {
+      router.replace("/");
+    }
+  }, [user]);
 
   const validateField = (name, value) => {
     setErrors((prev) => {
       const newErrors = { ...prev };
-
       if (name === "username" && !value.trim()) {
         newErrors.username = ["Username cannot be empty."];
-      } else {
-        delete newErrors.username;
-      }
+      } else delete newErrors.username;
 
       if (name === "password" && value.length < 8) {
         newErrors.password = ["Min 8 characters."];
-      } else {
-        delete newErrors.password;
-      }
+      } else delete newErrors.password;
 
       return newErrors;
     });
   };
 
   const handleSubmit = async () => {
+    if (!username || !password) {
+      setErrors({ general: ["Fill in both fields"] });
+      return;
+    }
+
     try {
       await login(username, password);
     } catch (err) {
-      console.log(err);
       setErrors({ general: ["Invalid credentials"] });
     }
   };
@@ -64,7 +63,9 @@ export default function Login() {
         source={require("@/assets/images/loginimg.png")}
         style={styles.image}
       />
-
+      {errors.general && (
+        <Text style={styles.errorText}>{errors.general[0]}</Text>
+      )}
       <TextInput
         style={styles.input}
         placeholder="Username"
@@ -74,7 +75,6 @@ export default function Login() {
           validateField("username", text);
         }}
       />
-
       <TextInput
         style={styles.input}
         placeholder="Password"
@@ -85,12 +85,7 @@ export default function Login() {
           validateField("password", text);
         }}
       />
-
       <Button title="Login" onPress={handleSubmit} />
-
-      <TouchableOpacity>
-        <Text style={styles.link}>Don’t have an account? Sign up now!</Text>
-      </TouchableOpacity>
     </KeyboardAvoidingView>
   );
 }
@@ -112,20 +107,6 @@ const styles = StyleSheet.create({
     backgroundColor: "green",
     color: "white",
   },
-  errorText: {
-    marginBottom: 10,
-    color: "red",
-    textAlign: "center",
-  },
-  link: {
-    marginTop: 20,
-    textAlign: "center",
-    color: "green",
-  },
-  image: {
-    width: 200,
-    height: 400,
-    alignSelf: "center",
-    marginBottom: 50,
-  },
+  errorText: { marginBottom: 10, color: "red", textAlign: "center" },
+  image: { width: 200, height: 400, alignSelf: "center", marginBottom: 50 },
 });
