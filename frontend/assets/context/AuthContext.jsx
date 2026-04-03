@@ -34,18 +34,15 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   // Login
-  const login = async (email, password) => {
+  const login = async (username, password) => {
     const { data } = await axiosInstance.post("/dj-rest-auth/login/", {
-      email,
+      username,
       password,
     });
 
-    await AsyncStorage.setItem("access_token", data.access);
-    await AsyncStorage.setItem("refresh_token", data.refresh);
-
+    await AsyncStorage.setItem("access_token", data.key);
     await loadUser();
   };
-
   // Logout
   const logout = async () => {
     await AsyncStorage.multiRemove(["access_token", "refresh_token"]);

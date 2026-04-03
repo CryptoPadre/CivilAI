@@ -8,16 +8,13 @@ export const axiosInstance = axios.create({
 });
 
 // Attach token to every request
-axiosInstance.interceptors.request.use(
-  async (config) => {
-    const token = await AsyncStorage.getItem("access_token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (err) => Promise.reject(err),
-);
+axiosInstance.interceptors.request.use(async (config) => {
+  const token = await AsyncStorage.getItem("access_token");
+  if (token) {
+    config.headers.Authorization = `Token ${token}`;
+  }
+  return config;
+});
 
 // Handle refresh on 401
 axiosInstance.interceptors.response.use(

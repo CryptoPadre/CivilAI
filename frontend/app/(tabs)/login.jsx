@@ -49,6 +49,7 @@ export default function Login() {
     try {
       await login(username, password);
     } catch (err) {
+      console.log(err);
       setErrors({ general: ["Invalid credentials"] });
     }
   };
