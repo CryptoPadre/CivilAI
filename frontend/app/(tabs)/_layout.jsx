@@ -37,6 +37,15 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="register"
+        options={{
+          title: "Register",
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons size={28} name="login" color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

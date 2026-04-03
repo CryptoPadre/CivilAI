@@ -48,7 +48,6 @@ export default function Login() {
   const handleSubmit = async () => {
     try {
       await login(username, password);
-      router.replace("/map");
     } catch (err) {
       setErrors({ general: ["Invalid credentials"] });
     }
