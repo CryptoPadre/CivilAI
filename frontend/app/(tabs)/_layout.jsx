@@ -42,7 +42,16 @@ export default function TabLayout() {
         options={{
           title: "Register",
           tabBarIcon: ({ color }) => (
-            <MaterialIcons size={28} name="login" color={color} />
+            <MaterialIcons size={28} name="app-registration" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="civilAI"
+        options={{
+          title: "CivilAI",
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons size={28} name="map" color={color} />
           ),
         }}
       />

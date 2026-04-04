@@ -76,7 +76,7 @@ export default function Register() {
       );
 
       // after successful registration → go to login
-      router.replace("/login");
+      router.replace("/civilAI");
     } catch (err) {
       console.log(err.response?.data);
       if (err.response?.data) {
