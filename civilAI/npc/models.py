@@ -69,7 +69,7 @@ class Npc(models.Model):
     last_name = models.CharField(max_length=255)
     age = models.IntegerField(default=0) 
     personality = models.CharField(max_length=55) 
-    created_at = models.DateTimeField(default=timezone.now)
+    born_at = models.DateTimeField(default=timezone.now)
     initial_age = models.IntegerField()  
     fertility = models.CharField(max_length=6, choices=FERTILITY_RATE)
     sexual_orientation = models.CharField(
@@ -78,6 +78,16 @@ class Npc(models.Model):
         default='hetero'
     )
     fitness_level = models.IntegerField(default=0)
+    intelligence_level = models.IntegerField(default=0)
+    aggression_level = models.IntegerField(default=0)
+    happiness_level = models.IntegerField(default=0)
+    stress_level = models.IntegerField(default=0)
+    charisma_level = models.IntegerField(default=0)
+    empathy_level = models.IntegerField(default=0)
+    morality_level = models.IntegerField(default=0)
+    health_level = models.IntegerField(default=100)
+    energy_level = models.IntegerField(default=100)
+    introversion_level = models.IntegerField(default=0)
     latitude = models.FloatField(default=49.2992)
     longitude = models.FloatField(default=19.9496)
 

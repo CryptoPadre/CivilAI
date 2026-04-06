@@ -8,7 +8,7 @@ from .models import Npc
 
 class  NpcListView(generics.ListCreateAPIView):
     serializer_class = NpcSerializer
-    queryset = Npc.objects.all().order_by('-created_at')
+    queryset = Npc.objects.all().order_by('-born_at')
      
     search_fields = [
          'first_name',

@@ -11,10 +11,25 @@ class NpcSerializer(serializers.ModelSerializer):
     fertility =  serializers.ReadOnlyField()
     sexual_orientation =  serializers.ReadOnlyField()
     fitness_level =  serializers.ReadOnlyField()
-    created_at = serializers.ReadOnlyField()
+    born_at = serializers.ReadOnlyField()
+    intelligence_level = serializers.ReadOnlyField()
+    aggression_level = serializers.ReadOnlyField()
+    happiness_level = serializers.ReadOnlyField()
+    stress_level = serializers.ReadOnlyField()
+    charisma_level = serializers.ReadOnlyField()
+    empathy_level = serializers.ReadOnlyField()
+    morality_level = serializers.ReadOnlyField()
+    health_level = serializers.ReadOnlyField()
+    energy_level = serializers.ReadOnlyField()
+    introversion_level = serializers.ReadOnlyField()
+    latitude = serializers.ReadOnlyField()
+    longitude = serializers.ReadOnlyField()
+    
     
     class Meta:
         model = Npc
         fields = [
-            'sex', 'first_name', 'last_name', 'age', 'personality', 'fertility', 'sexual_orientation', 'fitness_level', 'created_at'
+            'sex', 'first_name', 'last_name', 'age', 'personality', 'fertility', 'sexual_orientation', 'fitness_level', 
+            'born_at','intelligence_level','aggression_level','happiness_level','stress_level','charisma_level',
+            'empathy_level', 'morality_level', 'health_level', 'energy_level','introversion_level', 'latitude', 'longitude'
             ]

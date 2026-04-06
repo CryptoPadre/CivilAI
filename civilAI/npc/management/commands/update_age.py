@@ -3,6 +3,7 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 from civilAI.npc.models import Npc
 
+
 class Command(BaseCommand):
     help = 'Update NPC ages'
 
