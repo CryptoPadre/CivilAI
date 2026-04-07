@@ -70,12 +70,29 @@ class Npc(models.Model):
     age = models.IntegerField(default=0) 
     personality = models.CharField(max_length=55) 
     born_at = models.DateTimeField(default=timezone.now)
-    initial_age = models.IntegerField()  
+    initial_age = models.IntegerField(null=True, blank=True) 
+    is_alive = models.BooleanField(default=True)
+    died_at = models.DateTimeField(null=True, blank=True)
     fertility = models.CharField(max_length=6, choices=FERTILITY_RATE)
     sexual_orientation = models.CharField(
         max_length=10,
         choices=ORIENTATION_CHOICES,
         default='hetero'
+    )
+    mother = models.ForeignKey(
+    'self',
+    null=True,
+    blank=True,
+    on_delete=models.SET_NULL,
+    related_name='children_from_mother'
+    )
+
+    father = models.ForeignKey(
+        'self',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='children_from_father'
     )
     fitness_level = models.IntegerField(default=0)
     intelligence_level = models.IntegerField(default=0)
@@ -111,17 +128,20 @@ class Npc(models.Model):
                 self.PERSONALITY_BAD[idx]
             ])
 
-        if not self.pk:  
+        if not self.pk and self.initial_age is None:
             self.initial_age = random.randint(10, 60)
             self.age = self.initial_age
 
-        if not self.fitness_level:
+        if self.fitness_level is None:
             self.fitness_level = random.randint(0, 11)
         
-        if self.created_at:
-            delta = timezone.now() - self.created_at
+        if self.born_at:
+            delta = timezone.now() - self.born_at
             self.age = self.initial_age + int(delta.total_seconds() // 60)
-
+        
+        if self.mother and self.father and self.mother == self.father:
+            self.father = None
+        
         super().save(*args, **kwargs)
 
     def __str__(self):
