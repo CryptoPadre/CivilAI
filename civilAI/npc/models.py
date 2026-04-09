@@ -93,6 +93,15 @@ class Npc(models.Model):
         "Overbearing", "Impulsive", "Indecisive", "Hasty", "Self-centered", "Untrustworthy", "Needy", "Cynical", "Lazy", "Resentful",
         "Careless", "Irresponsible", "Obnoxious", "Greedy", "Controlling", "Sullen", "Insensitive", "Harsh", "Pompous", "Loud"
     ]
+    
+    DEGENERATIVE_CHOICES = [
+    ('none', 'None'),
+    ('sociopath', 'Sociopath'),
+    ('psychopath', 'Psychopath'),
+    ('pedophile', 'Pedophile'),
+    ('paranoid', 'Paranoid'),
+    ('narcissist', 'Narcissist'),
+]
 
     sex = models.CharField(max_length=1, choices=SEX_CHOICES)
     first_name = models.CharField(max_length=255)
@@ -129,6 +138,12 @@ class Npc(models.Model):
         blank=True,
         on_delete=models.SET_NULL,
         related_name='children_from_father'
+    )
+    
+    degenerative_condition = models.CharField(
+        max_length=20,
+        choices=DEGENERATIVE_CHOICES,
+        default='none'
     )
 
     fitness_level = models.IntegerField(default=0)
@@ -204,6 +219,12 @@ class Npc(models.Model):
         # Prevent same parent
         if self.mother and self.father and self.mother == self.father:
             self.father = None
+            
+        if not self.pk and self.degenerative_condition == 'none':
+            if random.random() < 0.01:  # 1% chance
+                self.degenerative_condition = random.choice(
+                    [c[0] for c in self.DEGENERATIVE_CHOICES if c[0] != 'none']
+                )
 
         super().save(*args, **kwargs)
 
