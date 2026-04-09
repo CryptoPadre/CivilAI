@@ -13,7 +13,7 @@ class Command(BaseCommand):
         for npc in Npc.objects.all():
             if npc.is_alive:
                 delta = now - npc.born_at
-                npc.age = npc.initial_age + int(delta.total_seconds() // 6)
+                npc.age = npc.initial_age + delta.days
                 npc.health_level -= 1
                 if npc.is_alive and npc.health_level <= 0:
                     npc.is_alive = False

@@ -11,7 +11,10 @@ class NpcSerializer(serializers.ModelSerializer):
     fertility =  serializers.ReadOnlyField()
     sexual_orientation =  serializers.ReadOnlyField()
     fitness_level =  serializers.ReadOnlyField()
+    is_adventurous = serializers.ReadOnlyField()
     born_at = serializers.ReadOnlyField()
+    mother = serializers.ReadOnlyField()
+    father = serializers.ReadOnlyField()
     intelligence_level = serializers.ReadOnlyField()
     aggression_level = serializers.ReadOnlyField()
     happiness_level = serializers.ReadOnlyField()
@@ -30,6 +33,6 @@ class NpcSerializer(serializers.ModelSerializer):
         model = Npc
         fields = [
             'sex', 'first_name', 'last_name', 'age', 'personality', 'fertility', 'sexual_orientation', 'fitness_level', 
-            'born_at','intelligence_level','aggression_level','happiness_level','stress_level','charisma_level',
+            'is_adventurous', 'born_at', 'mother', 'father', 'intelligence_level','aggression_level','happiness_level','stress_level','charisma_level',
             'empathy_level', 'morality_level', 'health_level', 'energy_level','introversion_level', 'latitude', 'longitude'
             ]
