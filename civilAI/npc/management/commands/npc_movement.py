@@ -29,7 +29,7 @@ class Command(BaseCommand):
 
             # Determine group step based on strongest NPC
             strongest = max(family, key=lambda x: x.fitness_level)
-            step = 0.003 if strongest.fitness_level > 7 and strongest.health_level > 60 else 0.001
+            step = 0.01 if strongest.fitness_level > 7 and strongest.health_level > 60 else 0.005
 
             # Check move chance for the main NPC
             move_chance = 1.0 if npc.energy_level >= 50 else npc.energy_level / 50
@@ -42,7 +42,7 @@ class Command(BaseCommand):
                     member.latitude += delta_lat
                     member.longitude += delta_lon
                     # Reduce energy individually
-                    member.energy_level -= 5 if step > 0.002 else 10
+                    member.energy_level -= 5 if step > 0.005 else 10
                     member._moved = True  # mark as moved
                     member.save()
                 

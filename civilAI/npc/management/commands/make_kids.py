@@ -1,5 +1,4 @@
 from django.core.management.base import BaseCommand
-from django.utils import timezone
 from civilAI.npc.models import Npc
 import random
 from math import radians, cos, sin, sqrt, atan2
@@ -39,6 +38,7 @@ class Command(BaseCommand):
 
         adults = Npc.objects.filter(
             age__gte=15,
+            age__lte=55,
             is_alive=True,
             sexual_orientation__in=['hetero', 'bi']
         )
@@ -48,12 +48,13 @@ class Command(BaseCommand):
             potential_partners = Npc.objects.filter(
                 sex='F' if npc.sex == 'M' else 'M',
                 age__gte=15,
-                is_alive=True
+                age__lte=55,
+                is_alive=True 
             ).exclude(id=npc.id)
 
             potential_partners = [
                 p for p in potential_partners
-                if not is_related(npc, p) and
+                if (not is_related(npc, p) or npc.degenerative_condition == "pedophile") and
                 self.distance_km(npc.latitude, npc.longitude, p.latitude, p.longitude) <= MAX_DISTANCE_KM
             ]
 
@@ -99,7 +100,10 @@ class Command(BaseCommand):
                 latitude=(mother.latitude + father.latitude)/2,
                 longitude=(mother.longitude + father.longitude)/2
             )
-
+            mother.has_kids = True
+            father.has_kids = True
+            mother.save(update_fields=["has_kids"])
+            father.save(update_fields=["has_kids"])
             # Save partner relationship for future bonding
                 
             npc.previous_partners.add(partner)

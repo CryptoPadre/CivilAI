@@ -139,7 +139,7 @@ class Npc(models.Model):
         on_delete=models.SET_NULL,
         related_name='children_from_father'
     )
-    
+    has_kids = models.BooleanField(default=False)
     degenerative_condition = models.CharField(
         max_length=20,
         choices=DEGENERATIVE_CHOICES,
@@ -149,7 +149,7 @@ class Npc(models.Model):
     fitness_level = models.IntegerField(default=0)
     intelligence_level = models.IntegerField(default=0)
     aggression_level = models.IntegerField(default=0)
-    happiness_level = models.IntegerField(default=0)
+    happiness_level = models.IntegerField(default=50)
     stress_level = models.IntegerField(default=0)
     charisma_level = models.IntegerField(default=0)
     empathy_level = models.IntegerField(default=0)
@@ -186,15 +186,24 @@ class Npc(models.Model):
         if not self.pk and self.initial_age is None:
             self.initial_age = random.randint(10, 60)
             self.age = self.initial_age
-
-        # Age update (based on time)
-        if self.born_at and self.initial_age is not None:
-            delta = timezone.now() - self.born_at
-            self.age = self.initial_age + int(delta.total_seconds() // 60)
-
-        # Fitness default
+        
         if self.fitness_level == 0:
             self.fitness_level = random.randint(1, 10)
+        
+        if self.intelligence_level == 0:
+            self.intelligence_level = random.randint(1, 10)
+        
+        if self.stress_level == 0:
+            self.stress_level = random.randint(1, 10)
+        
+        if self.empathy_level == 0:
+            self.empathy_level = random.randint(1, 10)
+        
+        if self.aggression_level == 0:
+            self.aggression_level = random.randint(1, 10)
+        
+        if self.morality_level == 0:
+            self.morality_level = random.randint(1, 10)
 
         # Introversion default
         if self.introversion_level == 50:
