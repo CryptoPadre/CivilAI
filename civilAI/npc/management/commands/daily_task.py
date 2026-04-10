@@ -6,6 +6,13 @@ import random
 class Command(BaseCommand):
     help = "Run daily NPC simulation tasks"
 
+    # ----------------------------
+    # CONFIG (life rules)
+    # ----------------------------
+    MIN_INTERACTION_AGE = 12
+    MIN_WORK_AGE = 14
+    MIN_ATTACK_AGE = 15
+
     TOLERANCE = 0.00001
 
     # ----------------------------
@@ -25,6 +32,9 @@ class Command(BaseCommand):
         "Impatient": {"attack": 1.1},
     }
 
+    # ----------------------------
+    # Helpers
+    # ----------------------------
     def get_effect(self, npc, action, default=1.0):
         return self.PERSONALITY_EFFECTS.get(npc.personality, {}).get(action, default)
 
@@ -35,9 +45,12 @@ class Command(BaseCommand):
         )
 
     # ----------------------------
-    # Actions
+    # ACTIONS (SAFE)
     # ----------------------------
     def attack(self, npc, target):
+        if npc.age < self.MIN_ATTACK_AGE or target.age < self.MIN_ATTACK_AGE:
+            return
+
         attack_chance = (npc.aggression_level / 10) * self.get_effect(npc, "attack")
 
         if random.random() > attack_chance:
@@ -65,6 +78,9 @@ class Command(BaseCommand):
         npc.energy_level -= 20
 
     def help_each_other(self, npc, other):
+        if npc.age < self.MIN_INTERACTION_AGE or other.age < self.MIN_INTERACTION_AGE:
+            return
+
         help_chance = 0.3 * self.get_effect(npc, "help")
 
         if random.random() > help_chance:
@@ -72,7 +88,6 @@ class Command(BaseCommand):
 
         npc.happiness_level += 1
         other.happiness_level += 1
-
         npc.morality_level += 1
         other.morality_level += 1
 
@@ -82,6 +97,9 @@ class Command(BaseCommand):
         print(f"🤝 {npc.first_name} helped {other.first_name}")
 
     def social(self, npc, other):
+        if npc.age < self.MIN_INTERACTION_AGE or other.age < self.MIN_INTERACTION_AGE:
+            return
+
         social_chance = 0.4 * self.get_effect(npc, "social")
 
         if random.random() < social_chance:
@@ -91,6 +109,9 @@ class Command(BaseCommand):
         print(f"💬 {npc.first_name} talked with {other.first_name}")
 
     def work(self, npc):
+        if npc.age < self.MIN_WORK_AGE:
+            return
+
         work_chance = 0.4 * self.get_effect(npc, "work")
 
         if random.random() > work_chance:
@@ -104,16 +125,21 @@ class Command(BaseCommand):
         print(f"💼 {npc.first_name} was working")
 
     # ----------------------------
-    # Main loop
+    # MAIN LOOP
     # ----------------------------
     def handle(self, *args, **kwargs):
-        npcs = list(Npc.objects.filter(is_alive=True, age__gte=15))
+        npcs = list(
+            Npc.objects.filter(
+                is_alive=True,
+                age__gte=self.MIN_INTERACTION_AGE
+            )
+        )
 
         print("\n===== DAILY NPC ACTIVITY =====\n")
 
         # 1. individual behavior
         for npc in npcs:
-            if random.random() < 0.4:
+            if npc.age >= self.MIN_WORK_AGE and random.random() < 0.4:
                 self.work(npc)
             else:
                 print(f"😴 {npc.first_name} is resting")

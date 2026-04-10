@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 from civilAI.npc.models import Npc
+from npc.utils import apply_npc_state_effects
 import random
 
 class Command(BaseCommand):
@@ -44,12 +45,14 @@ class Command(BaseCommand):
                     # Reduce energy individually
                     member.energy_level -= 5 if step > 0.005 else 10
                     member._moved = True  # mark as moved
+                    apply_npc_state_effects(member)
                     member.save()
                 
                 print(f"{npc.first_name} moved with family ({len(family)} members)")
             else:
-                # Optional: restore some energy if no movement
+                # Restore some energy if no movement
                 for member in family:
-                    member.energy_level += 5
+                    member.energy_level += 1
+                    apply_npc_state_effects(member)
                     member.save()
                 print(f"{npc.first_name} and family stayed in place")

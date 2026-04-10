@@ -10,16 +10,13 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         now = timezone.now()
 
-        for npc in Npc.objects.all():
-            if npc.is_alive:
-                delta = now - npc.born_at
-                npc.age = npc.initial_age + delta.days
-                npc.health_level -= 1
-                if npc.is_alive and npc.health_level <= 0:
-                    npc.is_alive = False
-                    npc.died_at = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
-                npc.save(update_fields=['age', 'health_level', 'is_alive', 'died_at'])
+        for npc in Npc.objects.filter(is_alive=True):
+            delta = now - npc.born_at
+            npc.age = npc.initial_age + delta.days
+            npc.health_level -= 1
+
+            npc.save(update_fields=['age', 'health_level'])
 
         self.stdout.write("NPC ages updated")
-        
+            
 

@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 from civilAI.npc.models import Npc
+from npc.utils import apply_npc_state_effects
 
 class Command(BaseCommand):
     help = "Apply degenerative NPC behavior effects"
@@ -26,22 +27,28 @@ class Command(BaseCommand):
             if npc.degenerative_condition == 'psychopath':
                 npc.aggression_level += 2
                 npc.empathy_level -= 2
+                npc.intelligence_level += 1
+                npc.charisma_level += 2
 
             elif npc.degenerative_condition == 'sociopath':
                 npc.morality_level -= 2
                 npc.stress_level += 1
+                npc.intelligence_level += 1
+                npc.charisma_level += 2
 
             elif npc.degenerative_condition == 'narcissist':
                 npc.charisma_level += 1
                 npc.empathy_level -= 1
+                npc.charisma_level += 1
 
             elif npc.degenerative_condition == 'paranoid':
                 npc.stress_level += 2
                 npc.introversion_level += 2
+                npc.health_level -= 2
 
             elif npc.degenerative_condition == 'pedophile':
                 npc.charisma_level += 2
-                npc.aggression_level -= 2
+                npc.aggression_level += 1
 
             # save NPC changes first (or at end, either is fine)
             npc.save()

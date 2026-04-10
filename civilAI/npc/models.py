@@ -114,6 +114,7 @@ class Npc(models.Model):
     died_at = models.DateTimeField(null=True, blank=True)
 
     is_adventurous = models.BooleanField(default=False)
+    is_leader = models.BooleanField(default=False)
 
     fertility = models.CharField(max_length=6, choices=FERTILITY_RATE)
     previous_partners = models.ManyToManyField(

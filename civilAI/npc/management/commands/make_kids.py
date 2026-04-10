@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 from civilAI.npc.models import Npc
+from npc.utils import apply_npc_state_effects
 import random
 from math import radians, cos, sin, sqrt, atan2
 
@@ -19,6 +20,8 @@ class Command(BaseCommand):
         return R * c
 
     def handle(self, *args, **kwargs):
+        base_mother_death_chance = 0.001  # 0.1% base risk
+        COMPLICATIONS_CHANCE = 0.01
         MAX_DISTANCE_KM = 2
 
         # Fertility → probability
@@ -78,7 +81,7 @@ class Command(BaseCommand):
             # Determine mother/father
             mother = npc if npc.sex == 'F' else partner
             father = npc if npc.sex == 'M' else partner
-
+            
             # Create child
             child_sex = random.choice(['M', 'F'])
             child = Npc.objects.create(
@@ -102,6 +105,45 @@ class Command(BaseCommand):
             )
             mother.has_kids = True
             father.has_kids = True
+            mother.energy_level -= 30
+            father.energy_level -= 10
+            mother.happiness_level += 40
+            father.happiness_level += 30
+            apply_npc_state_effects(mother)
+            apply_npc_state_effects(father)
+            # ----------------------------
+            # COMPLICATION SYSTEM
+            # ----------------------------
+            if random.random() < COMPLICATIONS_CHANCE:
+
+                # AGE-based risk factor
+                age = mother.age
+
+                if age < 20:
+                    age_factor = 1.2
+                elif age <= 34:
+                    age_factor = 1.0
+                elif age <= 39:
+                    age_factor = 2.0
+                else:
+                    age_factor = 4.0
+
+                mother_death_chance = base_mother_death_chance * age_factor
+
+                # Mother death
+                if random.random() < mother_death_chance:
+                    mother.health_level -= 100  # triggers process_death from npc.utils later
+
+                # Baby survival system (only if mother is at risk)
+                baby_survival_chance = 0.8
+
+                if age >= 35:
+                    baby_survival_chance -= 0.2
+                if age >= 40:
+                    baby_survival_chance -= 0.3
+
+                if random.random() > baby_survival_chance:
+                    child.health_level = 0  # baby dies (will be processed later)
             mother.save(update_fields=["has_kids"])
             father.save(update_fields=["has_kids"])
             # Save partner relationship for future bonding
