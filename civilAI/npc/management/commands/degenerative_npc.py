@@ -60,18 +60,20 @@ class Command(BaseCommand):
 
                     elif npc.degenerative_condition == 'sociopath':
                         target.stress_level += 3
+                        target.introversion_level += 5
 
                     elif npc.degenerative_condition == 'narcissist':
                         target.happiness_level -= 3
+                        target.introversion_level += 10
 
                     elif npc.degenerative_condition == 'paranoid':
                         target.stress_level -= 2
                         target.morality_level -= 2
+                        target.introversion_level +=5
 
                     elif npc.degenerative_condition == 'pedophile':
                         target.empathy_level -= 4
-                        print(f'{target} lost empathy')
-                        print(f'{npc} is ap redator')
+                        target.introversion_level += 15
 
                     target.save()
 
