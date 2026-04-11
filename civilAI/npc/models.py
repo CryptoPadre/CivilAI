@@ -171,11 +171,16 @@ class Npc(models.Model):
     health_level = models.IntegerField(default=100)
     energy_level = models.IntegerField(default=100)
     introversion_level = models.IntegerField(default=50)
-
+    creativity_level = models.IntegerField(default=0)
+    occupation = models.CharField(max_length=50, default="Unemployed")
+    wealth = models.IntegerField(default=0)
+    job_level = models.IntegerField(default=1)
+    salary = models.IntegerField(default=0)
     latitude = models.FloatField(default=49.2992)
     longitude = models.FloatField(default=19.9496)
 
     def save(self, *args, **kwargs):
+        from civilAI.npc.utils import assign_job, JOBS
         # Sex
         if not self.sex:
             self.sex = random.choice(['M', 'F'])
@@ -215,7 +220,9 @@ class Npc(models.Model):
         # Introversion default
         if self.introversion_level == 50:
             self.introversion_level = random.randint(0, 100)
-
+            
+        if self.creativity_level == 0:
+            self.creativity_level = random.randint(1, 10)
         # Adventurous trait (random ~20%)
         if not self.pk:
             self.is_adventurous = random.random() < 0.2
@@ -252,6 +259,8 @@ class Npc(models.Model):
                     current = getattr(self, field)
                     setattr(self, field, max(0, current + value))
         
+        if not self.pk:
+            assign_job(self, JOBS)
         
         super().save(*args, **kwargs)
 

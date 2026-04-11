@@ -14,14 +14,64 @@ class Command(BaseCommand):
     def leader_elections(self, npcs):
         Npc.objects.filter(is_leader=True).update(is_leader=False)
 
-        sorted_npcs = sorted(
-            npcs,
-            key=lambda n: n.charisma_level + n.intelligence_level,
-            reverse=True
-        )
+        def leadership_score(npc):
+            score = 0
+
+            # CORE SKILLS
+            score += npc.charisma_level * 2
+            score += npc.intelligence_level * 2
+            score += npc.morality_level * 1
+
+            # WEALTH
+            score += npc.wealth * 0.01
+
+            # JOB STATUS
+            score += npc.job_level * 2
+
+            high_status_jobs = [
+                "CEO", "Politician", "Mayor", "Judge", "Bank Manager",
+                "Military Officer", "Professor", "Scientist"
+            ]
+
+            if npc.occupation in high_status_jobs:
+                score += 15
+
+            # TRAITS
+            traits = npc.personality_traits or []
+
+            if "Brave" in traits:
+                score += 2
+            if "Honest" in traits:
+                score += 3
+            if "Friendly" in traits:
+                score += 2
+            if "Ambitious" in traits:
+                score += 4
+            if "Hardworking" in traits:
+                score += 3
+            if "Lazy" in traits:
+                score -= 5
+
+            # DEGENERATIVE CONDITIONS
+            condition = npc.degenerative_condition
+
+            if condition == "narcissist":
+                score += 5
+            elif condition == "sociopath":
+                score += 4
+            elif condition == "psychopath":
+                score += 6
+            elif condition == "paranoid":
+                score -= 4
+
+            return score
+
+        if not npcs:
+            return None
+
+        sorted_npcs = sorted(npcs, key=leadership_score, reverse=True)
 
         leader = sorted_npcs[0]
-
         leader.is_leader = True
         leader.save(update_fields=["is_leader"])
 
@@ -102,8 +152,11 @@ class Command(BaseCommand):
         for npc in npcs:
             apply_npc_state_effects(npc)
             npc.save()
-            
+        
+        if leader:
+            self.stdout.write(f"{leader.first_name} is leader")
+        else:
+            self.stdout.write("No leader selected")
         self.stdout.write(
-            f"{leader.first_name} {leader.last_name} is the current leader. "
             f"Global event: {event_name} occurred."
         )

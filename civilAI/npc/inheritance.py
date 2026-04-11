@@ -1,4 +1,5 @@
 import random
+from civilAI.npc.utils import assign_job, JOBS,clamp
 
 
 # ----------------------------
@@ -114,6 +115,8 @@ def evolve_12_18(npc):
         all_traits = getattr(npc, "PERSONALITY_GOOD", []) + getattr(npc, "PERSONALITY_BAD", [])
         if all_traits:
             npc.personality_traits.append(random.choice(all_traits))
+            
+    
 
 
 # ----------------------------
@@ -125,7 +128,9 @@ def evolve_adult(npc):
     - small drift only
     - life events matter more than genetics
     """
-
+    if npc.age >= 18 and npc.occupation == "Unemployed":
+        assign_job(npc, JOBS)
+    
     if not npc.personality_traits:
         return
 
@@ -142,3 +147,4 @@ def evolve_adult(npc):
     # midlife small change
     if random.random() < 0.005:
         npc.aggression_level += random.choice([-1, 1])
+    clamp(npc)

@@ -1,7 +1,8 @@
 from django.core.management.base import BaseCommand
 from django.core.management import call_command
 from django.utils import timezone
-from civilAI.npc.utils import process_death
+from civilAI.npc.utils import process_death, clamp
+from civilAI.npc.models import Npc
 
 class Command(BaseCommand):
     help = "WORLD TICK - run in every 5min - 1.25 day in simulation"
@@ -12,8 +13,10 @@ class Command(BaseCommand):
         # 1. NPC MOVEMENT
         self.stdout.write("→ Running movement system...")
         call_command("npc_movement")
-
         # 2. DAILY INTERACTIONS (attack / help / social / work)
         self.stdout.write("→ Running daily behavior...")
         call_command("daily_task")
         process_death()
+        for npc in Npc.objects.filter(is_alive=True):
+            clamp(npc)
+            npc.save()

@@ -136,11 +136,81 @@ class Command(BaseCommand):
             print(f"😴 {npc.first_name} skipped work")
             return
 
+        # ----------------------------
+        # BASE WORK EFFECTS
+        # ----------------------------
         npc.energy_level -= 10
         npc.fitness_level += 1
         npc.intelligence_level += 1
+        npc.stress_level += 1
 
         print(f"💼 {npc.first_name} was working")
+
+        # ----------------------------
+        # PROMOTION SYSTEM
+        # ----------------------------
+
+        trait_bonus = 0
+        leadership_bonus = 0
+
+        traits = npc.personality_traits or []
+
+        # Positive promotion traits
+        if "Hardworking" in traits:
+            trait_bonus += 2
+        if "Intelligent" in traits or "Smart" in traits:
+            trait_bonus += 2
+        if "Disciplined" in traits:
+            trait_bonus += 2
+        if "Charismatic" in traits or "Friendly" in traits:
+            leadership_bonus += 2
+        if "Ambitious" in traits:
+            trait_bonus += 3
+            leadership_bonus += 1
+
+        # Negative traits reduce promotion chance
+        if "Lazy" in traits:
+            trait_bonus -= 3
+        if "Incompetent" in traits:
+            trait_bonus -= 2
+
+        # ----------------------------
+        # DEGENERATIVE CONDITION EFFECTS
+        # ----------------------------
+        condition = getattr(npc, "degenerative_condition", "none")
+
+        if condition in ["narcissist", "sociopath"]:
+            leadership_bonus += 3
+            trait_bonus += 1  # they still climb socially
+
+        if condition == "psychopath":
+            leadership_bonus += 4  # very high manipulation success
+            trait_bonus -= 1      # unstable performance
+
+        # ----------------------------
+        # PROMOTION CHECK
+        # ----------------------------
+        promotion_score = (
+            npc.intelligence_level * 0.3 +
+            npc.charisma_level * 0.3 +
+            npc.fitness_level * 0.1 +
+            trait_bonus * 2 +
+            npc.job_level * 0.2
+        )
+
+        # Leadership override chance
+        leadership_chance = 0.02 + (leadership_bonus * 0.02)
+
+        # Promote job level
+        if random.random() < leadership_chance:
+            npc.job_level += 2
+            print(f"⬆️ {npc.first_name} jumped into leadership position")
+        elif promotion_score > 20 and random.random() < 0.3:
+            npc.job_level += 1
+            print(f"📈 {npc.first_name} got promoted")
+
+        # Salary scaling
+        npc.salary += npc.job_level * 5
 
     # ----------------------------
     # MAIN LOOP
