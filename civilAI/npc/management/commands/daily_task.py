@@ -1,5 +1,11 @@
 from django.core.management.base import BaseCommand
 from civilAI.npc.models import Npc
+from civilAI.npc.inheritance import (
+    evolve_0_5,
+    evolve_5_12,
+    evolve_12_18,
+    evolve_adult
+)
 import random
 
 
@@ -16,7 +22,7 @@ class Command(BaseCommand):
     TOLERANCE = 0.00001
 
     # ----------------------------
-    # Personality behavior weights
+    # Personality behavior weights (NOW TRAIT-BASED)
     # ----------------------------
     PERSONALITY_EFFECTS = {
         "Honest": {"help": 1.3, "attack": 0.7},
@@ -36,7 +42,16 @@ class Command(BaseCommand):
     # Helpers
     # ----------------------------
     def get_effect(self, npc, action, default=1.0):
-        return self.PERSONALITY_EFFECTS.get(npc.personality, {}).get(action, default)
+        """
+        Trait-based multiplier instead of single personality string.
+        """
+        multiplier = 1.0
+
+        for trait in (npc.personality_traits or []):
+            effects = self.PERSONALITY_EFFECTS.get(trait, {})
+            multiplier *= effects.get(action, 1.0)
+
+        return multiplier
 
     def same_location(self, a, b):
         return (
@@ -100,7 +115,10 @@ class Command(BaseCommand):
         if npc.age < self.MIN_INTERACTION_AGE or other.age < self.MIN_INTERACTION_AGE:
             return
 
-        social_chance = 0.4 * self.get_effect(npc, "social")
+        social_chance = 0.4 * (
+            self.get_effect(npc, "social") +
+            self.get_effect(other, "social")
+        ) / 2
 
         if random.random() < social_chance:
             npc.charisma_level += 1
@@ -137,14 +155,25 @@ class Command(BaseCommand):
 
         print("\n===== DAILY NPC ACTIVITY =====\n")
 
-        # 1. individual behavior
+        # 1. EVOLUTION FIRST (important)
+        for npc in npcs:
+            if npc.age <= 5:
+                evolve_0_5(npc)
+            elif npc.age <= 12:
+                evolve_5_12(npc)
+            elif npc.age <= 18:
+                evolve_12_18(npc)
+            else:
+                evolve_adult(npc)
+
+        # 2. individual behavior
         for npc in npcs:
             if npc.age >= self.MIN_WORK_AGE and random.random() < 0.4:
                 self.work(npc)
             else:
                 print(f"😴 {npc.first_name} is resting")
 
-        # 2. interactions
+        # 3. interactions
         for npc in npcs:
             for other in npcs:
                 if npc.id == other.id:
@@ -162,7 +191,7 @@ class Command(BaseCommand):
                 else:
                     self.social(npc, other)
 
-        # 3. save all changes
+        # 4. SAVE ONCE
         for npc in npcs:
             npc.save()
 

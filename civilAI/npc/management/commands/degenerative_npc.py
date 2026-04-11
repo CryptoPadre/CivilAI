@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from civilAI.npc.models import Npc
-from npc.utils import apply_npc_state_effects
+
 
 class Command(BaseCommand):
     help = "Apply degenerative NPC behavior effects"

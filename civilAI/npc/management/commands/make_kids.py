@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from civilAI.npc.models import Npc
-from npc.utils import apply_npc_state_effects
+from civilAI.npc.utils import apply_npc_state_effects
 import random
 from math import radians, cos, sin, sqrt, atan2
 
@@ -101,7 +101,9 @@ class Command(BaseCommand):
                 mother=mother,
                 father=father,
                 latitude=(mother.latitude + father.latitude)/2,
-                longitude=(mother.longitude + father.longitude)/2
+                longitude=(mother.longitude + father.longitude)/2,
+                personality_traits=inherited_traits
+                
             )
             mother.has_kids = True
             father.has_kids = True
@@ -146,6 +148,23 @@ class Command(BaseCommand):
                     child.health_level = 0  # baby dies (will be processed later)
             mother.save(update_fields=["has_kids"])
             father.save(update_fields=["has_kids"])
+            parent_traits = []
+
+            if mother.personality_traits:
+                parent_traits += mother.personality_traits
+
+            if father.personality_traits:
+                parent_traits += father.personality_traits
+
+            inherited_traits = []
+
+            for trait in parent_traits:
+                if random.random() < 0.7:  # strong early inheritance
+                    inherited_traits.append(trait)
+
+            # Limit + uniqueness
+            inherited_traits = list(set(inherited_traits))[:3]
+            child.personality_traits = inherited_traits
             # Save partner relationship for future bonding
                 
             npc.previous_partners.add(partner)

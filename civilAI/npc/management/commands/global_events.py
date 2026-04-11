@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.db.models import F
 from civilAI.npc.models import Npc
-from npc.utils import apply_npc_state_effects
+from civilAI.npc.utils import apply_npc_state_effects
 import random
 
 

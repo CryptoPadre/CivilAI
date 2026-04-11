@@ -81,18 +81,18 @@ class Npc(models.Model):
     "Honest", "Compassionate", "Loyal", "Brave", "Patient", "Generous", "Humble", "Optimistic", "Kind", "Responsible",
     "Respectful", "Trustworthy", "Courageous", "Friendly", "Forgiving", "Creative", "Reliable", "Empathetic", "Gentle", "Considerate",
     "Cheerful", "Modest", "Diligent", "Wise", "Supportive", "Fair", "Peaceful", "Sincere", "Curious", "Thoughtful",
-    "Hardworking", "Attentive", "Grateful", "Adventurous", "Flexible", "Persevering", "Patient", "Tolerant", "Protective", "Devoted",
-    "Innovative", "Balanced", "Disciplined", "Practical", "Charitable", "Alert", "Caring", "Friendly", "Generous", "Honorable",
+    "Hardworking", "Attentive", "Grateful", "Adventurous", "Flexible", "Persevering", "Tolerant", "Protective", "Devoted",
+    "Innovative", "Balanced", "Disciplined", "Practical", "Charitable", "Alert", "Caring", "Honorable",
     "Nurturing", "Observant"
-    ]
+]
 
     PERSONALITY_BAD = [
-        "Deceitful", "Cruel", "Disloyal", "Cowardly", "Impatient", "Selfish", "Arrogant", "Pessimistic", "Mean", "Irresponsible",
-        "Jealous", "Greedy", "Lazy", "Rude", "Vindictive", "Stubborn", "Dishonest", "Manipulative", "Impolite", "Narrow-minded",
-        "Cowardly", "Inconsiderate", "Spiteful", "Gossipy", "Short-tempered", "Unreliable", "Overcritical", "Unforgiving", "Boastful", "Reckless",
-        "Overbearing", "Impulsive", "Indecisive", "Hasty", "Self-centered", "Untrustworthy", "Needy", "Cynical", "Lazy", "Resentful",
-        "Careless", "Irresponsible", "Obnoxious", "Greedy", "Controlling", "Sullen", "Insensitive", "Harsh", "Pompous", "Loud"
-    ]
+    "Deceitful", "Cruel", "Disloyal", "Cowardly", "Impatient", "Selfish", "Arrogant", "Pessimistic", "Mean", "Irresponsible",
+    "Jealous", "Greedy", "Lazy", "Rude", "Vindictive", "Stubborn", "Dishonest", "Manipulative", "Impolite", "Narrow-minded",
+    "Inconsiderate", "Spiteful", "Gossipy", "Short-tempered", "Unreliable", "Overcritical", "Unforgiving", "Boastful", "Reckless",
+    "Overbearing", "Impulsive", "Indecisive", "Hasty", "Self-centered", "Untrustworthy", "Needy", "Cynical", "Resentful",
+    "Careless", "Obnoxious", "Controlling", "Sullen", "Insensitive", "Harsh", "Pompous", "Loud"
+]
     
     DEGENERATIVE_CHOICES = [
     ('none', 'None'),
@@ -102,12 +102,24 @@ class Npc(models.Model):
     ('paranoid', 'Paranoid'),
     ('narcissist', 'Narcissist'),
 ]
+    TRAIT_EFFECTS = {
+    "Kind": {"empathy_level": +2, "morality_level": +1},
+    "Cruel": {"empathy_level": -2, "aggression_level": +2},
+    "Brave": {"aggression_level": +1},
+    "Cowardly": {"aggression_level": -1},
+    "Lazy": {"fitness_level": -2},
+    "Hardworking": {"fitness_level": +2},
+    "Generous": {"morality_level": +2},
+    "Greedy": {"morality_level": -2},
+    "Friendly": {"charisma_level": +2},
+    "Rude": {"charisma_level": -2},
+}
 
     sex = models.CharField(max_length=1, choices=SEX_CHOICES)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     age = models.IntegerField(default=0) 
-    personality = models.CharField(max_length=55) 
+    personality_traits = models.JSONField(default=list)
     born_at = models.DateTimeField(default=timezone.now)
     initial_age = models.IntegerField(null=True, blank=True) 
     is_alive = models.BooleanField(default=True)
@@ -176,12 +188,6 @@ class Npc(models.Model):
 
         if not self.last_name:
             self.last_name = random.choice(self.LAST_NAMES)
-
-        # Personality
-        if not self.personality:
-            good_choice = random.choice(self.PERSONALITY_GOOD)
-            bad_choice = random.choice(self.PERSONALITY_BAD)
-            self.personality = random.choice([good_choice, bad_choice])
             
         # Initial age
         if not self.pk and self.initial_age is None:
@@ -235,12 +241,31 @@ class Npc(models.Model):
                 self.degenerative_condition = random.choice(
                     [c[0] for c in self.DEGENERATIVE_CHOICES if c[0] != 'none']
                 )
+        if not self.pk and not self.personality_traits:
+            all_traits = self.PERSONALITY_GOOD + self.PERSONALITY_BAD
+            self.personality_traits = random.sample(all_traits, k=random.randint(2, 3))
 
+        if not self.pk:
+            for trait in self.personality_traits:
+                effects = self.TRAIT_EFFECTS.get(trait, {})
+                for field, value in effects.items():
+                    current = getattr(self, field)
+                    setattr(self, field, max(0, current + value))
+        
+        
         super().save(*args, **kwargs)
 
     @property
     def has_family(self):
         return self.children_from_mother.exists() or self.children_from_father.exists()
+    
+    def generate_personality_label(self):
+        if not self.personality_traits:
+            return "Neutral"
+        return random.choice(self.personality_traits)
+    
+    def develop_personality(self):
+        pass
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name} ({self.personality})"
+        return f"{self.first_name} {self.last_name} ({self.generate_personality_label()})"

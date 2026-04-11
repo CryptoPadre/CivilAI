@@ -44,3 +44,12 @@ def apply_npc_state_effects(npc):
         npc.energy_level -= 2
         npc.happiness_level -= 1
         npc.morality_level += 2
+        
+    if npc.energy_level > 100:
+        npc.energy_level = 100
+    if npc.energy_level < 0:
+        npc.energy_level = 0
+    if npc.introversion_level > 100:
+        npc.introversion_level = 100
+    if npc.introversion_level < 0:
+        npc.introversion_level = 0
