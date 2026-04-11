@@ -211,6 +211,7 @@ class Command(BaseCommand):
 
         # Salary scaling
         npc.salary += npc.job_level * 5
+        npc.wealth += npc.salary / 30
 
     # ----------------------------
     # MAIN LOOP
