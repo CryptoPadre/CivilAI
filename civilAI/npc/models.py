@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
 import random
 from django.utils import timezone
 
@@ -159,22 +160,22 @@ class Npc(models.Model):
         default='none'
     )
 
-    fitness_level = models.IntegerField(default=0)
-    intelligence_level = models.IntegerField(default=0)
-    aggression_level = models.IntegerField(default=0)
-    happiness_level = models.IntegerField(default=50)
-    stress_level = models.IntegerField(default=0)
-    charisma_level = models.IntegerField(default=0)
-    empathy_level = models.IntegerField(default=0)
-    morality_level = models.IntegerField(default=0)
+    fitness_level = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(100)])
+    intelligence_level = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(100)])
+    aggression_level = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(100)])
+    happiness_level = models.IntegerField(default=50, validators=[MinValueValidator(0), MaxValueValidator(100)])
+    stress_level = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(100)])
+    charisma_level = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(100)])
+    empathy_level = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(100)])
+    morality_level = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(100)])
 
-    health_level = models.IntegerField(default=100)
-    energy_level = models.IntegerField(default=100)
-    introversion_level = models.IntegerField(default=50)
-    creativity_level = models.IntegerField(default=0)
+    health_level = models.IntegerField(default=100, validators=[MinValueValidator(0), MaxValueValidator(100)])
+    energy_level = models.IntegerField(default=100, validators=[MinValueValidator(0), MaxValueValidator(100)])
+    introversion_level = models.IntegerField(default=50, validators=[MinValueValidator(0), MaxValueValidator(100)])
+    creativity_level = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(100)])
     occupation = models.CharField(max_length=50, default="Unemployed")
     wealth = models.IntegerField(default=0)
-    job_level = models.IntegerField(default=1)
+    job_level = models.IntegerField(default=1, validators=[MinValueValidator(1), MaxValueValidator(10)])
     salary = models.IntegerField(default=0)
     latitude = models.FloatField(default=49.2992)
     longitude = models.FloatField(default=19.9496)
@@ -258,9 +259,6 @@ class Npc(models.Model):
                 for field, value in effects.items():
                     current = getattr(self, field)
                     setattr(self, field, max(0, current + value))
-        
-        if not self.pk:
-            assign_job(self, JOBS)
         
         super().save(*args, **kwargs)
 

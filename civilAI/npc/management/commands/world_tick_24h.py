@@ -26,9 +26,20 @@ class Command(BaseCommand):
 
             self.stdout.write("\n===== WORLD TICK END =====\n")
 
-            for npc in Npc.objects.filter(is_alive=True):
+            npcs = list(Npc.objects.filter(is_alive=True))
+
+            for npc in npcs:
                 clamp(npc)
-                npc.save()
+
+            Npc.objects.bulk_update(
+                npcs,
+                [
+                    "fitness_level", "intelligence_level", "aggression_level",
+                    "happiness_level", "stress_level", "charisma_level",
+                    "empathy_level", "morality_level", "health_level",
+                    "energy_level", "introversion_level", "creativity_level",
+                ]
+            )
             
         except Exception as e:
             self.stdout.write(self.style.ERROR(f"World tick failed: {e}"))

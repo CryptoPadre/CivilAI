@@ -8,7 +8,7 @@ class Command(BaseCommand):
     TOLERANCE = 0.0001
     
     def same_location(self, a, b):
-         return (
+        return (
             abs(a.latitude - b.latitude) < self.TOLERANCE and
             abs(a.longitude - b.longitude) < self.TOLERANCE
         )

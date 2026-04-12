@@ -147,12 +147,20 @@ class Command(BaseCommand):
         leader = self.leader_elections(npcs)
 
         event_name = self.run_global_event()
-        npcs = Npc.objects.filter(is_alive=True)
+
+        npcs = list(Npc.objects.filter(is_alive=True))
 
         for npc in npcs:
             apply_npc_state_effects(npc)
-            npc.save()
         
+        Npc.objects.bulk_update(npcs,
+        [
+        "fitness_level", "intelligence_level", "aggression_level",
+        "happiness_level", "stress_level", "charisma_level",
+        "empathy_level", "morality_level", "health_level",
+        "energy_level", "introversion_level", "creativity_level",
+        ]
+        )
         if leader:
             self.stdout.write(f"{leader.first_name} is leader")
         else:

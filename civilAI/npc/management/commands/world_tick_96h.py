@@ -12,6 +12,17 @@ class Command(BaseCommand):
         self.stdout.write("→ Running global events...")
         call_command("global_events")
         process_death()
-        for npc in Npc.objects.filter(is_alive=True):
+        npcs = list(Npc.objects.filter(is_alive=True))
+
+        for npc in npcs:
             clamp(npc)
-            npc.save()
+
+        Npc.objects.bulk_update(
+                npcs,
+                [
+                    "fitness_level", "intelligence_level", "aggression_level",
+                    "happiness_level", "stress_level", "charisma_level",
+                    "empathy_level", "morality_level", "health_level",
+                    "energy_level", "introversion_level", "creativity_level",
+                ]
+            )

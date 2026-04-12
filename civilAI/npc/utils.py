@@ -99,7 +99,36 @@ JOBS = {
     "Gang Member": {"aggression": 2, "fitness": 2},
 }
 
-def create_random_npcs(count=200):
+PERSONALITY_EFFECTS = {
+    "Hardworking": {"fitness": 2},
+    "Lazy": {"fitness": -3},
+
+    "Creative": {"creativity": 3},
+    "Curious": {"intelligence": 1},
+
+    "Brave": {"aggression": 2},
+    "Cowardly": {"aggression": -2},
+
+    "Friendly": {"charisma": 2},
+    "Rude": {"charisma": -2},
+
+    "Empathetic": {"empathy": 2},
+    "Cruel": {"empathy": -2},
+
+    "Greedy": {"intelligence": 1},
+    "Honest": {"morality": 2},
+}
+
+DEGENERATIVE_EFFECTS = {
+    "sociopath": {"empathy": -3, "charisma": 1, "aggression": 2},
+    "psychopath": {"empathy": -4, "aggression": 3},
+    "narcissist": {"charisma": 2, "morality": -2},
+    "paranoid": {"charisma": -1, "intelligence": 1},
+    "pedophile": {"empathy": -4, "morality" : -4},
+    "none": {}
+}
+
+def create_random_npcs(count=50):
     for _ in range(count):
         Npc.objects.create()
         
@@ -143,72 +172,67 @@ def apply_npc_state_effects(npc):
         npc.happiness_level -= 1
         npc.morality_level += 2
        
-# Related to jobs
+
 def clamp(npc):
-    npc.fitness_level = max(0, npc.fitness_level)
-    npc.intelligence_level = max(0, npc.intelligence_level)
-    npc.charisma_level = max(0, npc.charisma_level)
-    npc.creativity_level = max(0, npc.creativity_level)
-    npc.empathy_level = max(0, npc.empathy_level)
-    npc.morality_level = max(0, npc.morality_level)
+    npc.fitness_level = max(0, min(100, npc.fitness_level))
+    npc.intelligence_level = max(0, min(100, npc.intelligence_level))
+    npc.charisma_level = max(0, min(100, npc.charisma_level))
+    npc.creativity_level = max(0, min(100, npc.creativity_level))
+    npc.empathy_level = max(0, min(100, npc.empathy_level))
+    npc.morality_level = max(0, min(100, npc.morality_level))
 
-    npc.aggression_level = max(0, npc.aggression_level)
-    npc.stress_level = max(0, npc.stress_level)
-    npc.happiness_level = max(0, npc.happiness_level)
-
+    npc.aggression_level = max(0, min(100, npc.aggression_level))
+    npc.stress_level = max(0, min(100, npc.stress_level))
+    npc.happiness_level = max(0, min(100, npc.happiness_level))
     npc.energy_level = max(0, min(100, npc.energy_level))
 
 
 def score_job(npc, requirements):
     score = 0
 
+    # base stats vs job requirements
     for stat, weight in requirements.items():
         value = getattr(npc, f"{stat}_level", 0)
         score += value * weight
 
-    return score
-       
-        
-def apply_condition_modifier(npc, job, score):
-    condition = npc.degenerative_condition
+    # personality effects
+    for trait in npc.personality_traits:
+        effects = PERSONALITY_EFFECTS.get(trait, {})
+        for stat, bonus in effects.items():
+            score += bonus
 
-    if condition == "narcissist" and job in ["CEO", "Politician", "Manager"]:
-        score *= 1.3
+    # degenerative condition effects (NEW)
+    effects = DEGENERATIVE_EFFECTS.get(npc.degenerative_condition, {})
+    for stat, bonus in effects.items():
+        score += bonus
 
-    if condition == "sociopath" and job in ["Soldier", "Police Officer", "Gang Member"]:
-        score *= 1.4
+    # randomness (keeps diversity)
+    score += random.uniform(0, 5)
 
-    if condition == "psychopath":
-        score *= 1.2  
-
-    if condition == "paranoid":
-        score *= 0.9
-
-    if condition == "pedophile":
-        score *= 0.5
-    
     return score
        
         
 def assign_job(npc, JOBS):
+
+    if npc.age <= 18:
+        npc.occupation = "Unemployed"
+        npc.job_level = 1
+        npc.salary = 0
+        return npc
+
     best_job = None
     best_score = -1
 
     for job, reqs in JOBS.items():
-        # 1. base score first
         score = score_job(npc, reqs)
+        score += random.uniform(0, 0.5)
 
-        # 2. apply condition modifier
-        score = apply_condition_modifier(npc, job, score)
-
-        # 3. pick best job
         if score > best_score:
             best_score = score
             best_job = job
-    if best_job is None:
-        best_job = "Unemployed"
+
     npc.occupation = best_job
     npc.job_level = 1
-    npc.salary = random.randint(50, 200) + int(best_score * 10)
+    npc.salary = int(100 + best_score * 3 + random.randint(0, 50))
 
     return npc

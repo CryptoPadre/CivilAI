@@ -10,178 +10,144 @@ class Command(BaseCommand):
 
     def distance_km(self, lat1, lon1, lat2, lon2):
         R = 6371.0
-        lat1_rad, lon1_rad = radians(lat1), radians(lon1)
-        lat2_rad, lon2_rad = radians(lat2), radians(lon2)
+        dlat = radians(lat2 - lat1)
+        dlon = radians(lon2 - lon1)
 
-        dlat = lat2_rad - lat1_rad
-        dlon = lon2_rad - lon1_rad
-
-        a = sin(dlat / 2) ** 2 + cos(lat1_rad) * cos(lat2_rad) * sin(dlon / 2) ** 2
-        c = 2 * atan2(sqrt(a), sqrt(1 - a))
-        return R * c
+        a = (
+            sin(dlat / 2) ** 2
+            + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2) ** 2
+        )
+        return 2 * R * atan2(sqrt(a), sqrt(1 - a))
 
     def handle(self, *args, **kwargs):
-        base_mother_death_chance = 0.001
-        COMPLICATIONS_CHANCE = 0.01
+
         MAX_DISTANCE_KM = 2
 
-        FERTILITY_CHANCE = {
-            "H": 0.6,
-            "N": 0.3,
-            "L": 0.1,
-        }
+        FERTILITY_CHANCE = {"H": 0.6, "N": 0.3, "L": 0.1}
 
-        def is_related(npc1, npc2):
-            return (
-                npc1.id == npc2.mother_id
-                or npc1.id == npc2.father_id
-                or npc2.id == npc1.mother_id
-                or npc2.id == npc1.father_id
-            )
-
-        adults = Npc.objects.filter(
-            age__gte=15,
-            age__lte=55,
-            is_alive=True,
-            sexual_orientation__in=["hetero", "bi"],
-        )
-
-        for npc in adults:
-
-            potential_partners = Npc.objects.filter(
-                sex="F" if npc.sex == "M" else "M",
+        adults = list(
+            Npc.objects.filter(
                 age__gte=15,
                 age__lte=55,
                 is_alive=True,
-            ).exclude(id=npc.id)
+                sexual_orientation__in=["hetero", "bi"],
+            ).only(
+                "id", "sex", "age", "latitude", "longitude",
+                "fertility", "last_name",
+                "health_level", "energy_level", "happiness_level",
+                "personality_traits",
+            )
+        )
 
-            potential_partners = [
-                p for p in potential_partners
-                if (not is_related(npc, p) or npc.degenerative_condition == "pedophile")
+        # preload relations (IMPORTANT)
+        relations_map = {
+            n.id: set(n.previous_partners.values_list("id", flat=True))
+            for n in adults
+        }
+
+        new_children = []
+        updated_parents = []
+        relation_pairs = []
+
+        for npc in adults:
+
+            candidates = [
+                p for p in adults
+                if p.id != npc.id
+                and p.sex != npc.sex
+                and abs(p.age - npc.age) <= 20
                 and self.distance_km(
-                    npc.latitude, npc.longitude, p.latitude, p.longitude
+                    npc.latitude, npc.longitude,
+                    p.latitude, p.longitude
                 ) <= MAX_DISTANCE_KM
             ]
 
-            if not potential_partners:
+            if not candidates:
                 continue
 
-            prev_partners = [
-                p for p in potential_partners if p in npc.previous_partners.all()
+            # avoid relatives
+            candidates = [
+                p for p in candidates
+                if p.id not in relations_map[npc.id]
             ]
 
-            partner = (
-                random.choice(prev_partners)
-                if prev_partners and random.random() < 0.7
-                else random.choice(potential_partners)
-            )
+            if not candidates:
+                continue
+
+            partner = random.choice(candidates)
 
             npc_chance = FERTILITY_CHANCE.get(npc.fertility, 0.3)
             partner_chance = FERTILITY_CHANCE.get(partner.fertility, 0.3)
-            combined_chance = (npc_chance + partner_chance) / 2
 
-            if random.random() > combined_chance:
+            if random.random() > (npc_chance + partner_chance) / 2:
                 continue
 
             mother = npc if npc.sex == "F" else partner
             father = npc if npc.sex == "M" else partner
 
-            # ----------------------------
-            # FIX: generate traits BEFORE create()
-            # ----------------------------
-            parent_traits = []
-            if mother.personality_traits:
-                parent_traits += mother.personality_traits
-            if father.personality_traits:
-                parent_traits += father.personality_traits
-
-            inherited_traits = [
-                t for t in parent_traits if random.random() < 0.7
-            ]
-            inherited_traits = list(set(inherited_traits))[:3]
-
-            if not inherited_traits:
-                inherited_traits = []
-
-            child_sex = random.choice(["M", "F"])
-
-            child = Npc.objects.create(
-                sex=child_sex,
+            child = Npc(
+                sex=random.choice(["M", "F"]),
                 first_name=random.choice(
-                    Npc.MALE_FIRST_NAMES
-                    if child_sex == "M"
-                    else Npc.FEMALE_FIRST_NAMES
+                    Npc.MALE_FIRST_NAMES if random.random() < 0.5 else Npc.FEMALE_FIRST_NAMES
                 ),
                 last_name=father.last_name,
                 age=0,
-                initial_age=0,
-                fertility=random.choices(
-                    ["H", "N", "L"],
-                    weights=[0.5, 0.35, 0.15],
-                    k=1,
-                )[0],
-                sexual_orientation=random.choice(
-                    [o[0] for o in Npc.ORIENTATION_CHOICES]
-                ),
+                fertility=random.choice(["H", "N", "L"]),
+                sexual_orientation=random.choice([o[0] for o in Npc.ORIENTATION_CHOICES]),
                 mother=mother,
                 father=father,
                 latitude=(mother.latitude + father.latitude) / 2,
                 longitude=(mother.longitude + father.longitude) / 2,
-                personality_traits=inherited_traits,
+                personality_traits=list(set(
+                    (mother.personality_traits or []) + (father.personality_traits or [])
+                ))[:3],
             )
 
-            # ----------------------------
-            # SIDE EFFECTS
-            # ----------------------------
-            mother.has_kids = True
-            father.has_kids = True
+            new_children.append(child)
 
+            # side effects in memory only
             mother.energy_level -= 30
             father.energy_level -= 10
-
             mother.happiness_level += 40
             father.happiness_level += 30
 
-            apply_npc_state_effects(mother)
-            apply_npc_state_effects(father)
+            mother.has_kids = True
+            father.has_kids = True
 
-            # ----------------------------
-            # COMPLICATION SYSTEM
-            # ----------------------------
-            if random.random() < COMPLICATIONS_CHANCE:
-                age = mother.age
+            updated_parents.extend([mother, father])
 
-                if age < 20:
-                    age_factor = 1.2
-                elif age <= 34:
-                    age_factor = 1.0
-                elif age <= 39:
-                    age_factor = 2.0
-                else:
-                    age_factor = 4.0
+            relation_pairs.append((mother, father))
 
-                mother_death_chance = base_mother_death_chance * age_factor
+        # bulk operations
+        Npc.objects.bulk_create(new_children)
 
-                if random.random() < mother_death_chance:
-                    mother.health_level -= 100
-                    mother.save(update_fields=["health_level"])
+        Npc.objects.bulk_update(
+            updated_parents,
+            ["energy_level", "happiness_level", "has_kids"]
+        )
+        
+        # collect affected NPCs only
+        affected_npcs = set(updated_parents)
 
-                baby_survival_chance = 0.8
-                if age >= 35:
-                    baby_survival_chance -= 0.2
-                if age >= 40:
-                    baby_survival_chance -= 0.3
+        # include children (after bulk_create they now exist in DB)
+        affected_npcs.update(new_children)
 
-                if random.random() > baby_survival_chance:
-                    child.health_level = 0
+        # apply effects
+        for npc in affected_npcs:
+            apply_npc_state_effects(npc)
 
-            mother.save(update_fields=["has_kids"])
-            father.save(update_fields=["has_kids"])
-            child.save(update_fields=["health_level"])
+        Npc.objects.bulk_update(
+            affected_npcs,
+            [
+                "fitness_level", "intelligence_level", "aggression_level",
+                "happiness_level", "stress_level", "charisma_level",
+                "empathy_level", "morality_level", "health_level",
+                "energy_level", "introversion_level", "creativity_level",
+            ]
+)
 
-            npc.previous_partners.add(partner)
-            partner.previous_partners.add(npc)
+        # relations (still unavoidable but minimized)
+        for a, b in relation_pairs:
+            a.previous_partners.add(b)
 
-            self.stdout.write(
-                f"New NPC {child.first_name} born from {mother.first_name} + {father.first_name}"
-            )
+        self.stdout.write(f"Created {len(new_children)} children")
