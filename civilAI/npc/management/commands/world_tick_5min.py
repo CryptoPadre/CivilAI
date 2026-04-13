@@ -1,7 +1,8 @@
 from django.core.management.base import BaseCommand
 from django.core.management import call_command
 from django.utils import timezone
-from civilAI.npc.utils import process_death, clamp, assign_job, JOBS
+from civilAI.npc.utils import process_death, clamp
+from civilAI.npc.work import assign_job_by_traits
 from civilAI.npc.models import Npc
 
 class Command(BaseCommand):
@@ -17,13 +18,15 @@ class Command(BaseCommand):
         self.stdout.write("→ Running daily behavior...")
         call_command("daily_task")
         process_death()
+        Npc.objects.filter(age__lt=18).update(occupation="Unemployed")
+
         npcs = list(Npc.objects.filter(is_alive=True))
 
         for npc in npcs:
             clamp(npc)
 
-            if npc.occupation == "Unemployed":
-                assign_job(npc, JOBS)
+            if npc.occupation == "Unemployed" and npc.age >= 18:
+                assign_job_by_traits(npc)
 
         Npc.objects.bulk_update(
             npcs,
