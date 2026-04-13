@@ -73,6 +73,88 @@ DEGENERATIVE_EFFECTS = {
     "none": ["Manual Jobs", "Service Jobs", "Skilled Jobs", "Government Jobs", "Top Jobs", "Creative Jobs"]
 }
 
+JOB_SALARY = {
+    # Manual
+    "Baker": 18,
+    "Butcher": 20,
+    "Farmer": 15,
+    "Fisherman": 17,
+    "Miner": 25,
+    "Factory Worker": 22,
+    "Construction Worker": 24,
+    "Cleaner": 14,
+    "Warehouse Worker": 20,
+    "Delivery Driver": 21,
+
+    # Service
+    "Retail Worker": 18,
+    "Cashier": 16,
+    "Waiter": 17,
+    "Barista": 16,
+    "Receptionist": 19,
+    "Security Guard": 22,
+    "Janitor": 15,
+    "Hairdresser": 23,
+    "Taxi Driver": 24,
+    "Cook": 22,
+
+    # Skilled
+    "Teacher": 35,
+    "Nurse": 38,
+    "Doctor": 70,
+    "Engineer": 60,
+    "Mechanic": 40,
+    "Electrician": 42,
+    "Plumber": 45,
+    "Architect": 55,
+    "Pharmacist": 50,
+    "Accountant": 48,
+
+    # Creative
+    "Artist": 25,
+    "Musician": 30,
+    "Writer": 28,
+    "Journalist": 32,
+    "Photographer": 27,
+    "Designer": 35,
+    "Actor": 50,
+    "Chef": 45,
+    "Influencer": 40,
+    "Game Developer": 55,
+
+    # Government
+    "Police Officer": 35,
+    "Firefighter": 38,
+    "Soldier": 30,
+    "Military Officer": 50,
+    "Judge": 80,
+    "Lawyer": 75,
+    "Politician": 85,
+    "Mayor": 70,
+    "Bank Manager": 65,
+
+    # Top
+    "CEO": 120,
+    "Investor": 100,
+    "Scientist": 70,
+    "Professor": 65,
+    "Researcher": 60,
+    "Pilot": 90,
+    "Air Traffic Controller": 85,
+    "Detective": 55,
+    "Psychologist": 50,
+    "Economist": 60,
+
+    # Illegal
+    "Unemployed": 0,
+    "Criminal": 10,
+    "Thief": 15,
+    "Hacker": 40,
+    "Smuggler": 35,
+    "Informant": 25,
+    "Gang Member": 20,
+}
+
 # -------------------------
 # MAIN FUNCTION
 # -------------------------
@@ -134,5 +216,9 @@ def assign_job_by_traits(npc):
     # 5. FINAL JOB PICK
     # -------------------------
     npc.occupation = random.choice(JOBS[selected_category])
+  
+    if npc.salary == 0 and npc.occupation != "Unemployed":
+        base = JOB_SALARY.get(npc.occupation, 20)
+        npc.salary = base * npc.job_level
 
     return npc

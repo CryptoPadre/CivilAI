@@ -1,5 +1,6 @@
 import random
-from civilAI.npc.utils import assign_job, JOBS,clamp
+from civilAI.npc.utils import clamp
+from civilAI.npc.work import assign_job_by_traits
 
 
 # ----------------------------
@@ -129,7 +130,7 @@ def evolve_adult(npc):
     - life events matter more than genetics
     """
     if npc.age >= 18 and npc.occupation == "Unemployed":
-        assign_job(npc, JOBS)
+        assign_job_by_traits(npc)
     
     if not npc.personality_traits:
         return

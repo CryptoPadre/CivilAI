@@ -38,7 +38,7 @@ class Command(BaseCommand):
             family = [f for f in family if f.is_alive]
 
             strongest = max(family, key=lambda x: x.fitness_level)
-            step = 0.02 if strongest.fitness_level > 7 and strongest.health_level > 60 else 0.01
+            step = 0.2 if strongest.fitness_level > 7 and strongest.health_level > 60 else 0.1
 
             move_chance = 1.0 if npc.energy_level >= 50 else npc.energy_level / 50
 
@@ -52,7 +52,7 @@ class Command(BaseCommand):
 
                     member.latitude += delta_lat
                     member.longitude += delta_lon
-                    member.energy_level -= 5 if step > 0.01 else 10
+                    member.energy_level -= 5 if step > 0.1 else 10
 
                     apply_npc_state_effects(member)
 

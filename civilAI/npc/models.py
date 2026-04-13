@@ -181,7 +181,7 @@ class Npc(models.Model):
     longitude = models.FloatField(default=19.9496)
 
     def save(self, *args, **kwargs):
-        from civilAI.npc.utils import assign_job, JOBS
+        from civilAI.npc.work import assign_job_by_traits
         # Sex
         if not self.sex:
             self.sex = random.choice(['M', 'F'])
@@ -253,12 +253,28 @@ class Npc(models.Model):
             all_traits = self.PERSONALITY_GOOD + self.PERSONALITY_BAD
             self.personality_traits = random.sample(all_traits, k=random.randint(2, 3))
 
+        # -------------------------
+        # ENSURE TRAITS
+        # -------------------------
+        if not self.personality_traits:
+            all_traits = self.PERSONALITY_GOOD + self.PERSONALITY_BAD
+            self.personality_traits = random.sample(all_traits, k=random.randint(2, 3))
+
+        # -------------------------
+        # APPLY TRAIT EFFECTS (ONLY ON CREATE)
+        # -------------------------
         if not self.pk:
             for trait in self.personality_traits:
                 effects = self.TRAIT_EFFECTS.get(trait, {})
                 for field, value in effects.items():
                     current = getattr(self, field)
                     setattr(self, field, max(0, current + value))
+
+        # -------------------------
+        # ASSIGN JOB (ONLY ON CREATE)
+        # -------------------------
+        if not self.pk:
+            assign_job_by_traits(self)
         
         super().save(*args, **kwargs)
 

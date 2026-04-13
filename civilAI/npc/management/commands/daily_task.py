@@ -143,8 +143,8 @@ class Command(BaseCommand):
         elif promotion_score > 20 and random.random() < 0.3:
             npc.job_level += 1
 
-        npc.salary += npc.job_level * 5
-        npc.wealth += npc.salary / 30
+        npc.salary += npc.job_level * 2
+        npc.wealth += npc.salary
 
     # ----------------------------
     # MAIN

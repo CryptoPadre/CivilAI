@@ -2,7 +2,7 @@ from civilAI.npc.models import Npc
 from django.utils import timezone
 import random
 
-def create_random_npcs(count=50):
+def create_random_npcs(count=1000):
     for _ in range(count):
         Npc.objects.create()
         
@@ -59,54 +59,3 @@ def clamp(npc):
     npc.stress_level = max(0, min(100, npc.stress_level))
     npc.happiness_level = max(0, min(100, npc.happiness_level))
     npc.energy_level = max(0, min(100, npc.energy_level))
-
-
-def score_job(npc, requirements):
-    score = 0
-
-    # base stats vs job requirements
-    for stat, weight in requirements.items():
-        value = getattr(npc, f"{stat}_level", 0)
-        score += value * weight
-
-    # personality effects
-    for trait in npc.personality_traits:
-        effects = PERSONALITY_EFFECTS.get(trait, {})
-        for stat, bonus in effects.items():
-            score += bonus
-
-    # degenerative condition effects (NEW)
-    effects = DEGENERATIVE_EFFECTS.get(npc.degenerative_condition, {})
-    for stat, bonus in effects.items():
-        score += bonus
-
-    # randomness (keeps diversity)
-    score += random.uniform(0, 5)
-
-    return score
-       
-        
-def assign_job(npc, JOBS):
-
-    if npc.age <= 18:
-        npc.occupation = "Unemployed"
-        npc.job_level = 1
-        npc.salary = 0
-        return npc
-
-    best_job = None
-    best_score = -1
-
-    for job, reqs in JOBS.items():
-        score = score_job(npc, reqs)
-        score += random.uniform(0, 0.5)
-
-        if score > best_score:
-            best_score = score
-            best_job = job
-
-    npc.occupation = best_job
-    npc.job_level = 1
-    npc.salary = int(100 + best_score * 3 + random.randint(0, 50))
-
-    return npc
