@@ -64,9 +64,6 @@ export default function Login() {
         source={require("@/assets/images/loginimg.png")}
         style={styles.image}
       />
-      {errors.general && (
-        <Text style={styles.errorText}>{errors.general[0]}</Text>
-      )}
       <TextInput
         style={styles.input}
         placeholder="Username"
@@ -86,6 +83,9 @@ export default function Login() {
           validateField("password", text);
         }}
       />
+      {errors.general && (
+        <Text style={styles.errorText}>{errors.general[0]}</Text>
+      )}
       <Button title="Login" onPress={handleSubmit} />
 
       <TouchableOpacity onPress={() => router.replace("/register")}>
