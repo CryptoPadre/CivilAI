@@ -42,15 +42,16 @@ export default function Login() {
   };
 
   const handleSubmit = async () => {
-    if (!username || !password) {
+    if (!signInData.username || !signInData.password) {
       setErrors({ general: ["Fill in both fields"] });
       return;
     }
 
     try {
-      await login(username, password);
+      await login(signInData.username, signInData.password);
     } catch (err) {
-      setErrors({ general: ["Invalid credentials"] });
+      console.log(err.response?.data || err.message);
+      setErrors({ general: ["Login failed"] });
     }
   };
 
@@ -67,21 +68,19 @@ export default function Login() {
       <TextInput
         style={styles.input}
         placeholder="Username"
-        value={username}
-        onChangeText={(text) => {
-          setSignInData((prev) => ({ ...prev, username: text }));
-          validateField("username", text);
-        }}
+        value={signInData.username}
+        onChangeText={(text) =>
+          setSignInData((prev) => ({ ...prev, username: text }))
+        }
       />
       <TextInput
         style={styles.input}
         placeholder="Password"
         secureTextEntry
-        value={password}
-        onChangeText={(text) => {
-          setSignInData((prev) => ({ ...prev, password: text }));
-          validateField("password", text);
-        }}
+        value={signInData.password}
+        onChangeText={(text) =>
+          setSignInData((prev) => ({ ...prev, password: text }))
+        }
       />
       {errors.general && (
         <Text style={styles.errorText}>{errors.general[0]}</Text>

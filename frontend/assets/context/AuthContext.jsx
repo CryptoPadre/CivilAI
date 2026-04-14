@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { axiosInstance } from "../api/axios";
+import axios from "axios";
 
 const AuthContext = createContext();
 
@@ -17,9 +18,18 @@ export const AuthProvider = ({ children }) => {
 
       if (!token) return setUser(null);
 
-      const { data } = await axiosInstance.get("/dj-rest-auth/user/");
-      setUser(data);
+      const res = await axios.get(
+        "https://civilai.onrender.com/api/dj-rest-auth/user/",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      setUser(res.data);
     } catch (err) {
+      console.log("USER ERROR:", err.response?.data || err.message);
       setUser(null);
     } finally {
       setLoading(false);
@@ -28,15 +38,22 @@ export const AuthProvider = ({ children }) => {
 
   // Login
   const login = async (username, password) => {
-    const res = await axiosInstance.post("/token/", {
-      username,
-      password,
-    });
+    try {
+      const res = await axiosInstance.post("/token/", {
+        username,
+        password,
+      });
 
-    await AsyncStorage.setItem("access_token", res.data.access);
-    await AsyncStorage.setItem("refresh_token", res.data.refresh);
+      console.log("LOGIN RESPONSE:", res.data);
 
-    await loadUser();
+      await AsyncStorage.setItem("access_token", res.data.access);
+      await AsyncStorage.setItem("refresh_token", res.data.refresh);
+
+      await loadUser();
+    } catch (err) {
+      console.log("🔥 LOGIN ERROR FULL:", err.response?.data || err.message);
+      throw err; // IMPORTANT
+    }
   };
   // Logout
   const logout = async () => {
