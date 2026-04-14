@@ -22,7 +22,7 @@ export default function Login() {
   // Redirect logged-in user to main page automatically
   useEffect(() => {
     if (user) {
-      router.replace("/");
+      router.replace("/(tabs)");
     }
   }, [user]);
 
@@ -88,7 +88,7 @@ export default function Login() {
       )}
       <Button title="Login" onPress={handleSubmit} />
 
-      <TouchableOpacity onPress={() => router.replace("/register")}>
+      <TouchableOpacity onPress={() => router.push("/register")}>
         <Text style={styles.link}>Don't have an account? Register</Text>
       </TouchableOpacity>
     </KeyboardAvoidingView>

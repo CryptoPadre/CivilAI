@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 from pathlib import Path
 import os
 import dj_database_url
+from datetime import timedelta
 
 if os.path.exists('env.py'):
     import env
@@ -68,23 +69,23 @@ MIDDLEWARE = [
 
 
 REST_FRAMEWORK = {
-    "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly"
+      "DEFAULT_PERMISSION_CLASSES": [
+       "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.TokenAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 10,
-    
-    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
+    "DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend"
+    ],
 }
 
+REST_USE_JWT = True
+
 REST_AUTH = {
-    "SESSION_COOKIE_SAMESITE": None,
-    "SESSION_COOKIE_SECURE": True,
-    "CSRF_COOKIE_SECURE": True,
+    "USE_JWT": True
 }
 
 ROOT_URLCONF = 'civilAI.urls'
@@ -103,6 +104,12 @@ TEMPLATES = [
         },
     },
 ]
+
+
+SIMPLE_JWT = {
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
+
 
 WSGI_APPLICATION = 'civilAI.wsgi.application'
 

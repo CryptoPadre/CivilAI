@@ -26,12 +26,6 @@ const App = () => {
                 <Text style={styles.buttonText}>Login</Text>
               </Pressable>
             </Link>
-
-            <Link href="/register" style={{ marginHorizontal: "auto" }} asChild>
-              <Pressable style={styles.button}>
-                <Text style={styles.buttonText}>Register</Text>
-              </Pressable>
-            </Link>
           </>
         )}
       </ImageBackground>

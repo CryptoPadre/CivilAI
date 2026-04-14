@@ -7,16 +7,18 @@ export const axiosInstance = axios.create({
   baseURL: BASE_URL,
 });
 
-// Attach token to every request
+// Attach JWT token
 axiosInstance.interceptors.request.use(async (config) => {
   const token = await AsyncStorage.getItem("access_token");
+
   if (token) {
-    config.headers.Authorization = `Token ${token}`;
+    config.headers.Authorization = `Bearer ${token}`;
   }
+
   return config;
 });
 
-// Handle refresh on 401
+// Refresh token on 401
 axiosInstance.interceptors.response.use(
   (res) => res,
   async (err) => {
@@ -29,7 +31,7 @@ axiosInstance.interceptors.response.use(
         const refresh = await AsyncStorage.getItem("refresh_token");
 
         const { data } = await axios.post(
-          `${BASE_URL}/dj-rest-auth/token/refresh/`,
+          `${BASE_URL}dj-rest-auth/token/refresh/`,
           { refresh },
         );
 

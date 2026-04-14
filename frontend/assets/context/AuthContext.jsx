@@ -15,10 +15,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const token = await AsyncStorage.getItem("access_token");
 
-      if (!token) {
-        setUser(null);
-        return;
-      }
+      if (!token) return setUser(null);
 
       const { data } = await axiosInstance.get("/dj-rest-auth/user/");
       setUser(data);
@@ -29,18 +26,16 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  useEffect(() => {
-    loadUser();
-  }, []);
-
   // Login
   const login = async (username, password) => {
-    const { data } = await axiosInstance.post("/dj-rest-auth/login/", {
+    const res = await axiosInstance.post("/token/", {
       username,
       password,
     });
 
-    await AsyncStorage.setItem("access_token", data.key);
+    await AsyncStorage.setItem("access_token", res.data.access);
+    await AsyncStorage.setItem("refresh_token", res.data.refresh);
+
     await loadUser();
   };
   // Logout
