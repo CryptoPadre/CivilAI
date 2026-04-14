@@ -54,8 +54,9 @@ def clamp(npc):
     npc.creativity_level = max(0, min(100, npc.creativity_level))
     npc.empathy_level = max(0, min(100, npc.empathy_level))
     npc.morality_level = max(0, min(100, npc.morality_level))
-
+    npc.introversion_level = max(0, min(100, npc.introversion_level))
     npc.aggression_level = max(0, min(100, npc.aggression_level))
     npc.stress_level = max(0, min(100, npc.stress_level))
     npc.happiness_level = max(0, min(100, npc.happiness_level))
     npc.energy_level = max(0, min(100, npc.energy_level))
+    npc.job_level = max(1, min(10, npc.job_level))

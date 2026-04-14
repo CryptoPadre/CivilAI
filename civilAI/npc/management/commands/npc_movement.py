@@ -54,7 +54,7 @@ class Command(BaseCommand):
                     member.longitude += delta_lon
                     member.energy_level -= 5 if step > 0.1 else 10
 
-                    apply_npc_state_effects(member)
+                    # apply_npc_state_effects(member)
 
                     moved_ids.add(member.id)
                     updated_npcs.append(member)
@@ -64,13 +64,13 @@ class Command(BaseCommand):
                     if member.id in moved_ids:
                         continue
 
-                    member.energy_level += 1
-                    apply_npc_state_effects(member)
+                    member.energy_level += 20
+                    # apply_npc_state_effects(member)
 
                     moved_ids.add(member.id)
                     updated_npcs.append(member)
 
-        # 🔥 single DB write
+        # single DB write
         Npc.objects.bulk_update(
             updated_npcs,
             [

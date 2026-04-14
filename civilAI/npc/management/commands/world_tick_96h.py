@@ -10,6 +10,8 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         # 6. GLOBAL EVENTS (world state changes)
         self.stdout.write("→ Running global events...")
+        call_command("degenerative_npc")
+        process_death()
         call_command("global_events")
         process_death()
         npcs = list(Npc.objects.filter(is_alive=True))

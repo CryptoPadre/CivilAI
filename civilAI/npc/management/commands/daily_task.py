@@ -76,10 +76,12 @@ class Command(BaseCommand):
         if random.random() > 0.3 * self.get_effect(npc, "help"):
             return
 
-        npc.happiness_level += 1
-        other.happiness_level += 1
-        npc.morality_level += 1
-        other.morality_level += 1
+        npc.happiness_level += 10
+        other.happiness_level += 10
+        npc.morality_level += 10
+        other.morality_level += 10
+        npc.aggression_level -= 10
+        other.aggression_level -= 10
         npc.energy_level -= 5
         other.energy_level -= 5
 
@@ -95,6 +97,12 @@ class Command(BaseCommand):
         if random.random() < chance:
             npc.charisma_level += 1
             other.charisma_level += 1
+            npc.happiness_level += 10
+            other.happiness_level += 10
+            npc.morality_level += 10
+            other.morality_level += 10
+            npc.aggression_level -= 10
+            other.aggression_level -= 10
 
     def work(self, npc):
         if npc.age < self.MIN_WORK_AGE:
@@ -140,11 +148,19 @@ class Command(BaseCommand):
 
         if random.random() < leadership_chance:
             npc.job_level += 2
+            npc.happiness_level += 10
+            npc.stress_level -= 10
         elif promotion_score > 20 and random.random() < 0.3:
             npc.job_level += 1
+            npc.happiness_level += 5
+            npc.stress_level -= 5
 
         npc.salary += npc.job_level * 2
         npc.wealth += npc.salary
+        if npc.wealth > npc.salary * 24:
+            npc.happiness_level += 15
+            npc.stress_level -= 15
+            
 
     # ----------------------------
     # MAIN
