@@ -11,8 +11,8 @@ from rest_framework.permissions import AllowAny
 class  NpcListView(generics.ListCreateAPIView):
     serializer_class = NpcSerializer
     permission_classes = [AllowAny]
-    queryset = Npc.objects.all().order_by('-born_at')
-     
+    queryset = Npc.objects.all()
+    """
     search_fields = [
          'first_name',
          'last_name'
@@ -21,6 +21,7 @@ class  NpcListView(generics.ListCreateAPIView):
         django_filters.rest_framework.DjangoFilterBackend,
         filters.SearchFilter
     ]
+    """
     
     
 class NpcDetailView(generics.RetrieveAPIView):
