@@ -115,6 +115,7 @@ class Command(BaseCommand):
         npc.fitness_level += 1
         npc.intelligence_level += 1
         npc.stress_level += 1
+        npc.introversion_level -= 10
 
         trait_bonus = 0
         leadership_bonus = 0
@@ -160,6 +161,7 @@ class Command(BaseCommand):
         if npc.wealth > npc.salary * 24:
             npc.happiness_level += 15
             npc.stress_level -= 15
+            npc.introuversion_level -= 15
             
 
     # ----------------------------
