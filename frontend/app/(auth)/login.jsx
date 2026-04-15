@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { useAuth } from "../../assets/context/AuthContext";
 import { useRouter } from "expo-router";
+import { axiosInstance } from "@/assets/api/axios";
 
 export default function Login() {
   const [signInData, setSignInData] = useState({ username: "", password: "" });
@@ -49,6 +50,7 @@ export default function Login() {
 
     try {
       await login(signInData.username, signInData.password);
+      console.log(axiosInstance);
     } catch (err) {
       console.log(err.response?.data || err.message);
       setErrors({ general: ["Login failed"] });

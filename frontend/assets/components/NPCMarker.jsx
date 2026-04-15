@@ -4,38 +4,30 @@ import { View, Text } from "react-native";
 import { axiosInstance } from "../api/axios";
 
 export default function NPCMarker() {
-  const [npcs, setNpcs] = useState([]);
+  const [npc, setNpc] = useState(null);
 
   useEffect(() => {
     axiosInstance
-      .get("/api/npc/")
+      .get("/npc/2/")
       .then((response) => {
-        setNpcs(response.data);
+        setNpc(response.data);
       })
-      .catch((error) => {
-        console.error(error);
-      });
+      .catch(console.error);
   }, []);
 
+  if (!npc) return null;
+
   return (
-    <>
-      {npcs.map((npc) => (
-        <Marker
-          key={npc.id}
-          coordinate={{
-            latitude: npc.latitude,
-            longitude: npc.longitude,
-          }}
-          title={npc.first_name}
-          description={String(npc.age)}
-        >
-          <View
-            style={{ padding: 5, backgroundColor: "white", borderRadius: 10 }}
-          >
-            <Text>{npc.icon || "🧍"}</Text>
-          </View>
-        </Marker>
-      ))}
-    </>
+    <Marker
+      coordinate={{
+        latitude: npc.latitude,
+        longitude: npc.longitude,
+      }}
+      title={npc.first_name}
+    >
+      <View style={{ padding: 5, backgroundColor: "white", borderRadius: 10 }}>
+        <Text>{npc.icon || "🧍"}</Text>
+      </View>
+    </Marker>
   );
 }

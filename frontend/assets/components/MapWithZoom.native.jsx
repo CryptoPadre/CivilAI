@@ -36,8 +36,9 @@ export default function MapWithZoom() {
 
   return (
     <View style={styles.container}>
-      <MapView ref={mapRef} style={styles.map} initialRegion={region} />
-      <NPCMarker />
+      <MapView ref={mapRef} style={styles.map} initialRegion={region}>
+        <NPCMarker />
+      </MapView>
       <View style={styles.controls}>
         <ZoomButton title="+" onPress={zoomIn} />
         <ZoomButton title="-" onPress={zoomOut} />
