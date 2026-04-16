@@ -9,19 +9,26 @@ export default function NPCMarker({ region }) {
   useEffect(() => {
     if (!region) return;
 
-    const min_lat = region.latitude - region.latitudeDelta / 2;
-    const max_lat = region.latitude + region.latitudeDelta / 2;
-    const min_lng = region.longitude - region.longitudeDelta / 2;
-    const max_lng = region.longitude + region.longitudeDelta / 2;
+    if (region.latitudeDelta > 40) {
+      setNpcs([]);
+      return;
+    }
 
-    axiosInstance
-      .get("/npc/", {
-        params: { min_lat, max_lat, min_lng, max_lng },
-      })
-      .then((response) => {
-        setNpcs(response.data.results);
-      })
-      .catch(console.error);
+    const timeout = setTimeout(() => {
+      const min_lat = region.latitude - region.latitudeDelta / 2;
+      const max_lat = region.latitude + region.latitudeDelta / 2;
+      const min_lng = region.longitude - region.longitudeDelta / 2;
+      const max_lng = region.longitude + region.longitudeDelta / 2;
+
+      axiosInstance
+        .get("/npc/", {
+          params: { min_lat, max_lat, min_lng, max_lng },
+        })
+        .then((res) => setNpcs(res.data.results))
+        .catch(console.error);
+    }, 400); //
+
+    return () => clearTimeout(timeout);
   }, [region]);
 
   return (
@@ -33,12 +40,10 @@ export default function NPCMarker({ region }) {
             latitude: npc.latitude,
             longitude: npc.longitude,
           }}
-          title={npc.first_name}
+          title={npc.first_name + " " + npc.last_name}
         >
-          <View
-            style={{ padding: 5, backgroundColor: "white", borderRadius: 10 }}
-          >
-            {/*<Text>{npc.last_name}</Text>*/}
+          <View style={{ padding: 5, borderRadius: 10 }}>
+            <Text>🧍</Text>
           </View>
         </Marker>
       ))}

@@ -23,7 +23,7 @@ class  NpcListView(generics.ListCreateAPIView):
     ]
     """
     def get_queryset(self):
-        qs = Npc.objects.all()
+        qs = Npc.objects.all().order_by("id")
 
         min_lat = self.request.query_params.get("min_lat")
         max_lat = self.request.query_params.get("max_lat")
