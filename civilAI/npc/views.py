@@ -22,6 +22,23 @@ class  NpcListView(generics.ListCreateAPIView):
         filters.SearchFilter
     ]
     """
+    def get_queryset(self):
+        qs = Npc.objects.all()
+
+        min_lat = self.request.query_params.get("min_lat")
+        max_lat = self.request.query_params.get("max_lat")
+        min_lng = self.request.query_params.get("min_lng")
+        max_lng = self.request.query_params.get("max_lng")
+
+        if all([min_lat, max_lat, min_lng, max_lng]):
+            qs = qs.filter(
+                latitude__gte=min_lat,
+                latitude__lte=max_lat,
+                longitude__gte=min_lng,
+                longitude__lte=max_lng,
+            )
+
+        return qs[:300]
     
     
 class NpcDetailView(generics.RetrieveAPIView):

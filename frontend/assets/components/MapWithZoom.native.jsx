@@ -40,9 +40,7 @@ export default function MapWithZoom() {
         ref={mapRef}
         style={styles.map}
         region={region}
-        onRegionChangeComplete={(newRegion) => {
-          setRegion(newRegion);
-        }}
+        onRegionChangeComplete={setRegion}
       >
         <NPCMarker region={region} />
       </MapView>

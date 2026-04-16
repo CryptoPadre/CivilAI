@@ -9,6 +9,7 @@ export default function MapWithZoom() {
     axiosInstance
       .get("/npc/")
       .then((response) => {
+        console.log("NPC count:", npcs.length);
         setNpcs(response.data.results);
       })
       .catch(console.error);
