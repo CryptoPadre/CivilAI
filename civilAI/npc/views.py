@@ -1,11 +1,9 @@
-from django.shortcuts import render
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-from collections import defaultdict
-import math
-from .serializers import NpcSerializer
+
 from .models import Npc
+from .serializers import NpcSerializer
 
 
 class NpcListView(generics.ListAPIView):
@@ -15,11 +13,13 @@ class NpcListView(generics.ListAPIView):
     def get_queryset(self):
         qs = Npc.objects.all().order_by("id")
 
+        # bounding box params
         min_lat = self.request.query_params.get("min_lat")
         max_lat = self.request.query_params.get("max_lat")
         min_lng = self.request.query_params.get("min_lng")
         max_lng = self.request.query_params.get("max_lng")
 
+        # filter only visible map area
         if all([min_lat, max_lat, min_lng, max_lng]):
             qs = qs.filter(
                 latitude__gte=float(min_lat),
@@ -28,60 +28,29 @@ class NpcListView(generics.ListAPIView):
                 longitude__lte=float(max_lng),
             )
 
+        # 🚀 limit results (important for performance)
         return qs[:300]
 
-    
+    # 🔥 custom response (no pagination, no clustering)
     def list(self, request, *args, **kwargs):
         qs = self.get_queryset()
 
-        zoom = float(request.query_params.get("zoom", 10))
+        return Response([
+            {
+                "id": npc.id,
+                "latitude": npc.latitude,
+                "longitude": npc.longitude,
+                "first_name": npc.first_name,
+                "last_name": npc.last_name,
+                # optional extras:
+                # "age": npc.age,
+                # "icon": npc.icon,
+            }
+            for npc in qs
+        ])
 
-        # ----------------------------
-        # ZOOMED IN → return real NPCs
-        # ----------------------------
-        if zoom < 5:
-            return Response([
-                {
-                    "type": "npc",
-                    "id": npc.id,
-                    "latitude": npc.latitude,
-                    "longitude": npc.longitude,
-                    "first_name": npc.first_name,
-                    "last_name": npc.last_name,
-                }
-                for npc in qs
-            ])
 
-        # ----------------------------
-        # ZOOMED OUT → cluster
-        # ----------------------------
-        grid_size = 5 if zoom > 20 else 2
-
-        clusters = defaultdict(list)
-
-        for npc in qs:
-            key = (
-                math.floor(npc.latitude * grid_size),
-                math.floor(npc.longitude * grid_size),
-            )
-            clusters[key].append(npc)
-
-        results = []
-
-        for items in clusters.values():
-            lat = sum(n.latitude for n in items) / len(items)
-            lng = sum(n.longitude for n in items) / len(items)
-
-            results.append({
-                "type": "cluster",
-                "latitude": lat,
-                "longitude": lng,
-                "count": len(items),
-            })
-
-        return Response(results)
-    
 class NpcDetailView(generics.RetrieveAPIView):
     queryset = Npc.objects.all()
     serializer_class = NpcSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [AllowAny] 

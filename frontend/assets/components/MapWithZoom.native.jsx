@@ -95,26 +95,29 @@ export default function MapWithZoom() {
         initialRegion={region}
         onRegionChangeComplete={(newRegion) => setRegion(newRegion)}
       >
-        {npcs.map((npc) => (
+        {npcs.map((item, index) => (
           <Marker
-            key={npc.id}
+            key={item.id || index}
             coordinate={{
-              latitude: npc.latitude,
-              longitude: npc.longitude,
+              latitude: item.latitude,
+              longitude: item.longitude,
             }}
-            title={`${npc.first_name} ${npc.last_name}`}
           >
-            <View
-              style={{
-                padding: 6,
-                backgroundColor: "#4F46E5",
-                borderRadius: 20,
-                borderWidth: 2,
-                borderColor: "white",
-              }}
-            >
-              <Text style={{ color: "white" }}>🧍</Text>
-            </View>
+            {item.type === "cluster" ? (
+              <View
+                style={{
+                  backgroundColor: "blue",
+                  padding: 10,
+                  borderRadius: 20,
+                }}
+              >
+                <Text style={{ color: "white" }}>{item.count}</Text>
+              </View>
+            ) : (
+              <View>
+                <Text>🧍</Text>
+              </View>
+            )}
           </Marker>
         ))}
       </MapViewClustering>
