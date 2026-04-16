@@ -1,144 +1,103 @@
-import MapViewClustering from "react-native-map-clustering";
+import MapView, { Marker } from "react-native-maps";
 import { View, StyleSheet, Text } from "react-native";
 import { useState, useRef, useEffect } from "react";
-import { Marker } from "react-native-maps";
-import ZoomButton from "@/assets/components/zoombutton";
 import { axiosInstance } from "../api/axios";
+import NpcCalloutCard from "./NpcCalloutCard";
 
 export default function MapWithZoom() {
   const mapRef = useRef(null);
 
-  const [region, setRegion] = useState({
+  const region = {
     latitude: 48.1486,
     longitude: 17.1077,
     latitudeDelta: 5,
     longitudeDelta: 5,
-  });
+  };
 
   const [npcs, setNpcs] = useState([]);
-  const lastRegionRef = useRef(null);
+  const [selectedNpc, setSelectedNpc] = useState(null);
+  const [loadingNpc, setLoadingNpc] = useState(false);
+  const requestId = useRef(0);
 
-  // ----------------------------
-  // ZOOM CONTROLS
-  // ----------------------------
-  const zoomIn = () => {
-    const newRegion = {
-      ...region,
-      latitudeDelta: Math.max(region.latitudeDelta / 2, 0.01),
-      longitudeDelta: Math.max(region.longitudeDelta / 2, 0.01),
-    };
-
-    setRegion(newRegion);
-    mapRef.current?.animateToRegion(newRegion, 300);
-  };
-
-  const zoomOut = () => {
-    const newRegion = {
-      ...region,
-      latitudeDelta: Math.min(region.latitudeDelta * 2, 100),
-      longitudeDelta: Math.min(region.longitudeDelta * 2, 100),
-    };
-
-    setRegion(newRegion);
-    mapRef.current?.animateToRegion(newRegion, 300);
-  };
-
-  // ----------------------------
-  // FETCH NPCs
-  // ----------------------------
   useEffect(() => {
-    if (!region) return;
+    const id = ++requestId.current;
 
-    // skip extreme zoom out
-    if (region.latitudeDelta > 40) {
-      setNpcs([]);
-      return;
+    const min_lat = region.latitude - region.latitudeDelta / 2;
+    const max_lat = region.latitude + region.latitudeDelta / 2;
+    const min_lng = region.longitude - region.longitudeDelta / 2;
+    const max_lng = region.longitude + region.longitudeDelta / 2;
+
+    axiosInstance
+      .get("/npc/", {
+        params: { min_lat, max_lat, min_lng, max_lng },
+      })
+      .then((res) => {
+        if (id !== requestId.current) return;
+        setNpcs(res.data);
+      })
+      .catch(console.error);
+  }, []);
+
+  const handleMarkerPress = async (item) => {
+    try {
+      setLoadingNpc(true);
+
+      const res = await axiosInstance.get(`/npc/${item.id}/`);
+      setSelectedNpc(res.data);
+    } catch (error) {
+      console.error("Failed to fetch NPC details:", error);
+    } finally {
+      setLoadingNpc(false);
     }
+  };
 
-    // prevent tiny movements from spamming API
-    if (lastRegionRef.current) {
-      const dr = Math.abs(lastRegionRef.current.latitude - region.latitude);
-      const dl = Math.abs(lastRegionRef.current.longitude - region.longitude);
-
-      if (dr < 0.01 && dl < 0.01) return;
-    }
-
-    lastRegionRef.current = region;
-
-    const timeout = setTimeout(() => {
-      const min_lat = region.latitude - region.latitudeDelta / 2;
-      const max_lat = region.latitude + region.latitudeDelta / 2;
-      const min_lng = region.longitude - region.longitudeDelta / 2;
-      const max_lng = region.longitude + region.longitudeDelta / 2;
-
-      axiosInstance
-        .get("/npc/", {
-          params: { min_lat, max_lat, min_lng, max_lng },
-        })
-        .then((res) => {
-          setNpcs(res.data);
-        })
-        .catch(console.error);
-    }, 100);
-
-    return () => clearTimeout(timeout);
-  }, [region]);
-
-  // ----------------------------
-  // RENDER
-  // ----------------------------
   return (
     <View style={styles.container}>
-      <MapViewClustering
-        ref={mapRef}
-        style={styles.map}
-        initialRegion={region}
-        onRegionChangeComplete={(newRegion) => setRegion(newRegion)}
-      >
-        {npcs.map((item, index) => (
-          <Marker
-            key={item.id || index}
-            coordinate={{
-              latitude: item.latitude,
-              longitude: item.longitude,
-            }}
-          >
-            {item.type === "cluster" ? (
-              <View
-                style={{
-                  backgroundColor: "blue",
-                  padding: 10,
-                  borderRadius: 20,
-                }}
-              >
-                <Text style={{ color: "white" }}>{item.count}</Text>
-              </View>
-            ) : (
-              <View>
-                <Text>🧍</Text>
-              </View>
-            )}
-          </Marker>
-        ))}
-      </MapViewClustering>
+      <MapView ref={mapRef} style={styles.map} initialRegion={region}>
+        {npcs.map((item) => {
+          if (
+            item?.latitude == null ||
+            item?.longitude == null ||
+            isNaN(Number(item.latitude)) ||
+            isNaN(Number(item.longitude))
+          ) {
+            return null;
+          }
 
-      <View style={styles.controls}>
-        <ZoomButton title="+" onPress={zoomIn} />
-        <ZoomButton title="-" onPress={zoomOut} />
-      </View>
+          return (
+            <Marker
+              key={String(item.id)}
+              coordinate={{
+                latitude: Number(item.latitude),
+                longitude: Number(item.longitude),
+              }}
+              onPress={() => handleMarkerPress(item)}
+            >
+              <View style={styles.dot}>
+                <Text style={styles.emoji}>🧍</Text>
+              </View>
+            </Marker>
+          );
+        })}
+      </MapView>
+
+      <NpcCalloutCard
+        npc={selectedNpc}
+        loading={loadingNpc}
+        onClose={() => setSelectedNpc(null)}
+      />
     </View>
   );
 }
 
-// ----------------------------
-// STYLES
-// ----------------------------
 const styles = StyleSheet.create({
   container: { flex: 1 },
   map: { flex: 1 },
-  controls: {
-    position: "absolute",
-    bottom: 50,
-    right: 20,
+  dot: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emoji: {
+    fontSize: 22,
   },
 });

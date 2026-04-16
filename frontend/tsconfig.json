@@ -13,5 +13,5 @@
     "**/*.tsx",
     "**/*.jsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts", "assets/utils/utils.js"  ]
+    "expo-env.d.ts", "assets/utils/utils.js", "assets/components/NpcCalloutCard.jsx"  ]
 }
