@@ -20,8 +20,8 @@ export default function MapWithZoom() {
       latitudeDelta: region.latitudeDelta / 2,
       longitudeDelta: region.longitudeDelta / 2,
     };
+
     setRegion(newRegion);
-    mapRef.current?.animateToRegion(newRegion, 300);
   };
 
   const zoomOut = () => {
@@ -30,14 +30,21 @@ export default function MapWithZoom() {
       latitudeDelta: region.latitudeDelta * 2,
       longitudeDelta: region.longitudeDelta * 2,
     };
+
     setRegion(newRegion);
-    mapRef.current?.animateToRegion(newRegion, 300);
   };
 
   return (
     <View style={styles.container}>
-      <MapView ref={mapRef} style={styles.map} initialRegion={region}>
-        <NPCMarker />
+      <MapView
+        ref={mapRef}
+        style={styles.map}
+        region={region}
+        onRegionChangeComplete={(newRegion) => {
+          setRegion(newRegion);
+        }}
+      >
+        <NPCMarker region={region} />
       </MapView>
       <View style={styles.controls}>
         <ZoomButton title="+" onPress={zoomIn} />

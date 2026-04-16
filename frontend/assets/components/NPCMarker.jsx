@@ -10,7 +10,7 @@ export default function NPCMarker() {
     axiosInstance
       .get("/npc/")
       .then((response) => {
-        setNpcs(response.data);
+        setNpcs(response.data.results);
       })
       .catch(console.error);
   }, []);
@@ -29,7 +29,7 @@ export default function NPCMarker() {
           <View
             style={{ padding: 5, backgroundColor: "white", borderRadius: 10 }}
           >
-            <Text>{npc.icon || "🧍"}</Text>
+            {/*<Text>{npc.last_name}</Text>*/}
           </View>
         </Marker>
       ))}

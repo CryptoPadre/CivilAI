@@ -13,6 +13,6 @@ class NpcSerializer(serializers.ModelSerializer):
         fields = [
             'sex', 'first_name', 'last_name', 'age', 'personality_traits', 'fertility', 'sexual_orientation', 'previous_partners', 'fitness_level', 
             'is_adventurous', 'born_at', 'mother', 'father', 'intelligence_level','aggression_level','happiness_level','stress_level','charisma_level',
-            'empathy_level', 'morality_level', 'health_level', 'energy_level','introversion_level', 'latitude', 'longitude'
+            'empathy_level', 'morality_level', 'health_level', 'energy_level','introversion_level', 'latitude', 'longitude', 'occupation', 'job_level','wealth', 'personality_traits'
             ]
         read_only_fields = fields

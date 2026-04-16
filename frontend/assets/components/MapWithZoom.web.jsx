@@ -1,10 +1,28 @@
 import { View, Text, StyleSheet } from "react-native";
+import { useEffect, useState } from "react";
+import { axiosInstance } from "../api/axios";
 
 export default function MapWithZoom() {
+  const [npcs, setNpcs] = useState([]);
+
+  useEffect(() => {
+    axiosInstance
+      .get("/npc/")
+      .then((response) => {
+        setNpcs(response.data.results);
+      })
+      .catch(console.error);
+  }, []);
   return (
-    <View style={styles.container}>
-      <Text>Map is not available on web. Please use mobile.</Text>
-    </View>
+    <>
+      {npcs.map((npc) => (
+        <View style={styles.container} key={npc.id}>
+          <Text>
+            {npc.first_name} {npc.last_name} - {npc.occupation}
+          </Text>
+        </View>
+      ))}
+    </>
   );
 }
 
