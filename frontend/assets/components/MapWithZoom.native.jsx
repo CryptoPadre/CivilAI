@@ -1,4 +1,4 @@
-import MapView from "react-native-maps";
+import MapView from "react-native-map-clustering";
 import { View, StyleSheet } from "react-native";
 import { useState, useRef } from "react";
 import ZoomButton from "@/assets/components/zoombutton";
