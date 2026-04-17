@@ -11,7 +11,7 @@ class NpcListView(generics.ListAPIView):
     permission_classes = [AllowAny]
 
     def get_queryset(self):
-        qs = Npc.objects.all().order_by("id")
+        qs = Npc.objects.only("id", "latitude", "longitude", "first_name", "last_name")
 
         # bounding box params
         min_lat = self.request.query_params.get("min_lat")
@@ -29,7 +29,7 @@ class NpcListView(generics.ListAPIView):
             )
 
         #  limit results for performance
-        return qs[:1000]
+        return qs[:4000]
 
     # 🔥 custom response (no pagination, no clustering)
     def list(self, request, *args, **kwargs):
