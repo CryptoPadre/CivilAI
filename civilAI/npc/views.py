@@ -28,8 +28,8 @@ class NpcListView(generics.ListAPIView):
                 longitude__lte=float(max_lng),
             )
 
-        # 🚀 limit results (important for performance)
-        return qs[:300]
+        #  limit results for performance
+        return qs[:1000]
 
     # 🔥 custom response (no pagination, no clustering)
     def list(self, request, *args, **kwargs):

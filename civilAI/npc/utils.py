@@ -1,10 +1,17 @@
 from civilAI.npc.models import Npc
 from django.utils import timezone
-import random
 
-def create_random_npcs(count=1000):
-    for _ in range(count):
+def create_random_npcs(count=150000):
+    created = 0
+
+    for i in range(1, count + 1):
         Npc.objects.create()
+        created += 1
+
+        if i % 1000 == 0:
+            print(f"{created} NPCs created so far...")
+
+    print(f"Finished. Total NPCs created: {created}")
         
         
 def process_death():

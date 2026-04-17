@@ -17,8 +17,9 @@ const App = () => {
     <View style={styles.container}>
       <ImageBackground source={bgImage} resizeMode="cover" style={styles.image}>
         <Text style={styles.text}>CivilAI</Text>
+        {/* Only show buttons if user is not logged in // THIS WILL BE ENABLED IN LATER PHASE 
         {user && <Text style={styles.text}>Logged in as: {user.username}</Text>}
-        {/* Only show buttons if user is not logged in */}
+      
         {!user && (
           <>
             <Link href="/login" style={{ marginHorizontal: "auto" }} asChild>
@@ -27,7 +28,7 @@ const App = () => {
               </Pressable>
             </Link>
           </>
-        )}
+        )}*/}
       </ImageBackground>
     </View>
   );
@@ -51,6 +52,7 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 42,
     fontWeight: "bold",
+    width: 200,
     textAlign: "center",
     backgroundColor: "rgba(0,0,0,0.5)",
     marginBottom: 120,
