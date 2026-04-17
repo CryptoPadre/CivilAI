@@ -1,4 +1,5 @@
-import MapView, { Marker } from "react-native-maps";
+import MapView from "react-native-map-clustering";
+import { Marker } from "react-native-maps";
 import { View, StyleSheet, Text } from "react-native";
 import { useState, useRef, useEffect } from "react";
 import { axiosInstance } from "../api/axios";
@@ -8,10 +9,10 @@ export default function MapWithZoom() {
   const mapRef = useRef(null);
 
   const region = {
-    latitude: 48.1486,
-    longitude: 17.1077,
-    latitudeDelta: 5,
-    longitudeDelta: 5,
+    latitude: 49.2992,
+    longitude: 19.9496,
+    latitudeDelta: 2,
+    longitudeDelta: 2,
   };
 
   const [npcs, setNpcs] = useState([]);
@@ -33,15 +34,23 @@ export default function MapWithZoom() {
       })
       .then((res) => {
         if (id !== requestId.current) return;
-        setNpcs(res.data);
+
+        const data = Array.isArray(res.data)
+          ? res.data
+          : Array.isArray(res.data?.results)
+            ? res.data.results
+            : [];
+
+        setNpcs(data);
       })
-      .catch(console.error);
+      .catch((error) => {
+        console.error("Failed to fetch NPCs:", error);
+      });
   }, []);
 
   const handleMarkerPress = async (item) => {
     try {
       setLoadingNpc(true);
-
       const res = await axiosInstance.get(`/npc/${item.id}/`);
       setSelectedNpc(res.data);
     } catch (error) {
@@ -53,14 +62,20 @@ export default function MapWithZoom() {
 
   return (
     <View style={styles.container}>
-      <MapView ref={mapRef} style={styles.map} initialRegion={region}>
-        {npcs.map((item) => {
-          if (
-            item?.latitude == null ||
-            item?.longitude == null ||
-            isNaN(Number(item.latitude)) ||
-            isNaN(Number(item.longitude))
-          ) {
+      <MapView
+        ref={mapRef}
+        style={styles.map}
+        initialRegion={region}
+        animationEnabled={false}
+        preserveClusterPressBehavior={false}
+        clusterColor="#2f6fed"
+        clusterTextColor="#ffffff"
+      >
+        {npcs.map((item, index) => {
+          const lat = Number(item?.latitude);
+          const lng = Number(item?.longitude);
+
+          if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
             return null;
           }
 
