@@ -1,7 +1,8 @@
 from django.urls import path
-from .views import NpcMapView, NpcDetailView
+from . import views
 
 urlpatterns = [
-    path("npc/", NpcMapView.as_view(), name="npc-map"),
-    path("npc/<int:pk>/", NpcDetailView.as_view(), name="npc-detail"),
+    path('npc/', views.NpcListView.as_view()),
+    path('npc/<int:pk>/', views.NpcDetailView.as_view())
+   
 ]
