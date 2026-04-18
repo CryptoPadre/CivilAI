@@ -1,26 +1,20 @@
 import MapView from "react-native-map-clustering";
 import { Marker } from "react-native-maps";
 import { View, StyleSheet, Text } from "react-native";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useCallback } from "react";
 import { axiosInstance } from "../api/axios";
 import NpcCalloutCard from "./NpcCalloutCard";
 
 export default function MapWithZoom() {
   const mapRef = useRef(null);
-
-  const region = {
-    latitude: 49.2992,
-    longitude: 19.9496,
-    latitudeDelta: 2,
-    longitudeDelta: 2,
-  };
+  const requestId = useRef(0);
+  const timeoutRef = useRef(null);
 
   const [npcs, setNpcs] = useState([]);
   const [selectedNpc, setSelectedNpc] = useState(null);
   const [loadingNpc, setLoadingNpc] = useState(false);
-  const requestId = useRef(0);
 
-  useEffect(() => {
+  const fetchMapData = useCallback(async (region) => {
     const id = ++requestId.current;
 
     const min_lat = region.latitude - region.latitudeDelta / 2;
@@ -28,30 +22,51 @@ export default function MapWithZoom() {
     const min_lng = region.longitude - region.longitudeDelta / 2;
     const max_lng = region.longitude + region.longitudeDelta / 2;
 
-    axiosInstance
-      .get("/npc/", {
-        params: { min_lat, max_lat, min_lng, max_lng },
-      })
-      .then((res) => {
-        if (id !== requestId.current) return;
-
-        const data = Array.isArray(res.data)
-          ? res.data
-          : Array.isArray(res.data?.results)
-            ? res.data.results
-            : [];
-
-        setNpcs(data);
-      })
-      .catch((error) => {
-        console.error("Failed to fetch NPCs:", error);
+    try {
+      const res = await axiosInstance.get("/npc/", {
+        params: {
+          min_lat,
+          max_lat,
+          min_lng,
+          max_lng,
+          latitudeDelta: region.latitudeDelta,
+          longitudeDelta: region.longitudeDelta,
+        },
       });
+
+      if (id !== requestId.current) return;
+
+      const data = Array.isArray(res.data)
+        ? res.data
+        : Array.isArray(res.data?.results)
+          ? res.data.results
+          : [];
+
+      setNpcs(data);
+    } catch (error) {
+      console.error("Failed to fetch NPCs:", error);
+    }
   }, []);
+
+  const handleRegionChangeComplete = useCallback(
+    (region) => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+
+      timeoutRef.current = setTimeout(() => {
+        fetchMapData(region);
+      }, 250);
+    },
+    [fetchMapData],
+  );
 
   const handleMarkerPress = async (item) => {
     try {
       setLoadingNpc(true);
+
       const res = await axiosInstance.get(`/npc/${item.id}/`);
+
       setSelectedNpc(res.data);
     } catch (error) {
       console.error("Failed to fetch NPC details:", error);
@@ -65,13 +80,19 @@ export default function MapWithZoom() {
       <MapView
         ref={mapRef}
         style={styles.map}
-        initialRegion={region}
+        initialRegion={{
+          latitude: 49.2992,
+          longitude: 19.9496,
+          latitudeDelta: 0.1,
+          longitudeDelta: 0.1,
+        }}
+        onRegionChangeComplete={handleRegionChangeComplete}
         animationEnabled={false}
         preserveClusterPressBehavior={false}
         clusterColor="#2f6fed"
         clusterTextColor="#ffffff"
       >
-        {npcs.map((item, index) => {
+        {npcs.map((item) => {
           const lat = Number(item?.latitude);
           const lng = Number(item?.longitude);
 
@@ -82,16 +103,10 @@ export default function MapWithZoom() {
           return (
             <Marker
               key={String(item.id)}
-              coordinate={{
-                latitude: Number(item.latitude),
-                longitude: Number(item.longitude),
-              }}
+              coordinate={{ latitude: lat, longitude: lng }}
+              title={`${item.first_name} ${item.last_name}`}
               onPress={() => handleMarkerPress(item)}
-            >
-              <View style={styles.dot}>
-                <Text style={styles.emoji}>🧍</Text>
-              </View>
-            </Marker>
+            />
           );
         })}
       </MapView>
