@@ -38,7 +38,7 @@ class Command(BaseCommand):
             family = [f for f in family if f.is_alive]
 
             strongest = max(family, key=lambda x: x.fitness_level)
-            step = 0.001 if strongest.fitness_level > 7 and strongest.health_level > 60 else 0.0005
+            step = 0.6 if strongest.fitness_level > 7 and strongest.health_level > 60 else 0.3
 
             move_chance = 1.0 if npc.energy_level >= 50 else npc.energy_level / 50
 

@@ -177,8 +177,8 @@ class Npc(models.Model):
     wealth = models.IntegerField(default=0)
     job_level = models.IntegerField(default=1, validators=[MinValueValidator(1), MaxValueValidator(10)])
     salary = models.IntegerField(default=0)
-    latitude = models.FloatField(default=49.2992)
-    longitude = models.FloatField(default=19.9496)
+    latitude = models.FloatField(default=49.2992, db_index=True)
+    longitude = models.FloatField(default=19.9496, db_index=True)
 
     def save(self, *args, **kwargs):
         from civilAI.npc.work import assign_job_by_traits
