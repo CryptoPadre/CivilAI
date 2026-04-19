@@ -29,7 +29,7 @@ class NpcListView(generics.ListAPIView):
             )
 
         #  limit results for performance
-        return qs[:1500]
+        return qs[:500]
 
     # custom response (no pagination, no clustering)
     def list(self, request, *args, **kwargs):

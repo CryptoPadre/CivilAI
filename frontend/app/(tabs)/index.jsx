@@ -6,7 +6,7 @@ import {
   Pressable,
 } from "react-native";
 import React from "react";
-import bgImage from "@/assets/images/bg-ai.jpg";
+import bgImage from "@/assets/images/bg-ai.png";
 import { Link } from "expo-router";
 import { useAuth } from "../../assets/context/AuthContext";
 
@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     alignSelf: "center",
     textAlign: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
+
     marginBottom: 120,
   },
   button: {

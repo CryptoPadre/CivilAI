@@ -1,7 +1,7 @@
 from civilAI.npc.models import Npc
 from django.utils import timezone
 
-def create_random_npcs(count=150000):
+def create_random_npcs(count=200):
     created = 0
 
     for i in range(1, count + 1):
