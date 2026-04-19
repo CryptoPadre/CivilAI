@@ -49,13 +49,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   text: {
-    color: "white",
-    fontSize: 42,
+    color: "black",
+    fontFamily: "AcademyEngravedLetPlain",
+    fontSize: 48,
     fontWeight: "bold",
     alignSelf: "center",
     textAlign: "center",
 
-    marginBottom: 120,
+    marginBottom: 480,
   },
   button: {
     height: 60,

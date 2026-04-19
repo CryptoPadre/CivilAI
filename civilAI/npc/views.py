@@ -11,27 +11,26 @@ class NpcListView(generics.ListAPIView):
     permission_classes = [AllowAny]
 
     def get_queryset(self):
-        qs = Npc.objects.only("id", "latitude", "longitude", "first_name", "last_name")
+        qs = Npc.objects.only("id", "latitude", "longitude").order_by("id")
 
-        # bounding box params
         min_lat = self.request.query_params.get("min_lat")
         max_lat = self.request.query_params.get("max_lat")
         min_lng = self.request.query_params.get("min_lng")
         max_lng = self.request.query_params.get("max_lng")
 
-        # filter only visible map area
         if all([min_lat, max_lat, min_lng, max_lng]):
-            qs = qs.filter(
-                latitude__gte=float(min_lat),
-                latitude__lte=float(max_lat),
-                longitude__gte=float(min_lng),
-                longitude__lte=float(max_lng),
-            )
+            try:
+                qs = qs.filter(
+                    latitude__gte=float(min_lat),
+                    latitude__lte=float(max_lat),
+                    longitude__gte=float(min_lng),
+                    longitude__lte=float(max_lng),
+                )
+            except ValueError:
+                return Npc.objects.none()
 
-        #  limit results for performance
         return qs[:500]
 
-    # custom response (no pagination, no clustering)
     def list(self, request, *args, **kwargs):
         qs = self.get_queryset()
 
@@ -40,9 +39,6 @@ class NpcListView(generics.ListAPIView):
                 "id": npc.id,
                 "latitude": npc.latitude,
                 "longitude": npc.longitude,
-                "first_name": npc.first_name,
-                "last_name": npc.last_name,
-                "age": npc.age,
             }
             for npc in qs
         ])
@@ -51,4 +47,4 @@ class NpcListView(generics.ListAPIView):
 class NpcDetailView(generics.RetrieveAPIView):
     queryset = Npc.objects.all()
     serializer_class = NpcSerializer
-    permission_classes = [AllowAny] 
+    permission_classes = [AllowAny]
