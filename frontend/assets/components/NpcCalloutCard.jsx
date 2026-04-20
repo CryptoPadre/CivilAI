@@ -1,4 +1,6 @@
 import { View, Text, StyleSheet, Pressable, ScrollView } from "react-native";
+import { fertilityLabels } from "../constants/npcLabels";
+import { getNpcSummary } from "../constants/npcLabels";
 
 export default function NpcCalloutCard({ npc, loading, onClose }) {
   if (!npc && !loading) return null;
@@ -6,7 +8,7 @@ export default function NpcCalloutCard({ npc, loading, onClose }) {
   return (
     <View style={styles.container}>
       {loading ? (
-        <Text style={styles.title}>Loading NPC details...</Text>
+        <Text style={styles.title}>Loading details...</Text>
       ) : (
         <ScrollView>
           {/* HEADER */}
@@ -15,7 +17,7 @@ export default function NpcCalloutCard({ npc, loading, onClose }) {
           </Text>
 
           {/* BASIC INFO */}
-          <Text>Sex: {npc.sex}</Text>
+          <Text>Sex: {npc.sex === "F" ? "Female" : "Male"}</Text>
           <Text>Age: {npc.age}</Text>
           <Text>Born: {npc.born_at?.split("T")[0]}</Text>
           <Text>Occupation: {npc.occupation}</Text>
@@ -26,8 +28,11 @@ export default function NpcCalloutCard({ npc, loading, onClose }) {
           <Text style={styles.section}>Personality</Text>
           <Text>Traits: {npc.personality_traits?.join(", ") || "None"}</Text>
           <Text>Orientation: {npc.sexual_orientation}</Text>
-          <Text>Fertility: {npc.fertility}</Text>
-          <Text>Adventurous: {npc.is_adventurous ? "Yes" : "No"}</Text>
+          <Text>Fertility:{fertilityLabels[npc.fertility] ?? "Unknown"}</Text>
+          <Text>
+            Degenerative condition: {npc.degenerative_condition || "None"}
+          </Text>
+          {/*<Text>Adventurous: {npc.is_adventurous ? "Yes" : "No"}</Text>*/}
 
           {/* FAMILY */}
           <Text style={styles.section}>Family</Text>
@@ -43,6 +48,9 @@ export default function NpcCalloutCard({ npc, loading, onClose }) {
 
           {/* STATS */}
           <Text style={styles.section}>Stats</Text>
+          <Text>Health: {npc.health_level}</Text>
+          <Text>Energy: {npc.energy_level}</Text>
+          <Text>Introversion: {npc.introversion_level}</Text>
           <Text>Fitness: {npc.fitness_level}</Text>
           <Text>Intelligence: {npc.intelligence_level}</Text>
           <Text>Charisma: {npc.charisma_level}</Text>
@@ -51,9 +59,7 @@ export default function NpcCalloutCard({ npc, loading, onClose }) {
           <Text>Aggression: {npc.aggression_level}</Text>
           <Text>Stress: {npc.stress_level}</Text>
           <Text>Happiness: {npc.happiness_level}</Text>
-          <Text>Health: {npc.health_level}</Text>
-          <Text>Energy: {npc.energy_level}</Text>
-          <Text>Introversion: {npc.introversion_level}</Text>
+          <Text>{getNpcSummary(npc)}</Text>
 
           {/* CLOSE BUTTON */}
           <Pressable style={styles.button} onPress={onClose}>
