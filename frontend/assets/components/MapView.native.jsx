@@ -12,7 +12,7 @@ const INITIAL_REGION = {
   longitudeDelta: 0.1,
 };
 
-export default function MapWithZoom() {
+export default function Map() {
   const mapRef = useRef(null);
   const requestId = useRef(0);
   const timeoutRef = useRef(null);
