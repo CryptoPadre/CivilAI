@@ -55,7 +55,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     alignSelf: "center",
     textAlign: "center",
-
+    textShadowColor: "black",
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 4,
     marginBottom: 480,
   },
   button: {

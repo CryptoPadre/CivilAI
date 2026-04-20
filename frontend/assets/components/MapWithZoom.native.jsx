@@ -1,9 +1,16 @@
 import MapView from "react-native-map-clustering";
 import { Marker } from "react-native-maps";
-import { View, StyleSheet, Text } from "react-native";
-import { useState, useRef, useCallback } from "react";
+import { View, StyleSheet } from "react-native";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { axiosInstance } from "../api/axios";
 import NpcCalloutCard from "./NpcCalloutCard";
+
+const INITIAL_REGION = {
+  latitude: 49.2992,
+  longitude: 19.9496,
+  latitudeDelta: 0.1,
+  longitudeDelta: 0.1,
+};
 
 export default function MapWithZoom() {
   const mapRef = useRef(null);
@@ -29,8 +36,6 @@ export default function MapWithZoom() {
           max_lat,
           min_lng,
           max_lng,
-          latitudeDelta: region.latitudeDelta,
-          longitudeDelta: region.longitudeDelta,
         },
       });
 
@@ -64,9 +69,7 @@ export default function MapWithZoom() {
   const handleMarkerPress = async (item) => {
     try {
       setLoadingNpc(true);
-
       const res = await axiosInstance.get(`/npc/${item.id}/`);
-
       setSelectedNpc(res.data);
     } catch (error) {
       console.error("Failed to fetch NPC details:", error);
@@ -75,22 +78,29 @@ export default function MapWithZoom() {
     }
   };
 
+  useEffect(() => {
+    fetchMapData(INITIAL_REGION);
+
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [fetchMapData]);
+
   return (
     <View style={styles.container}>
       <MapView
         ref={mapRef}
         style={styles.map}
-        initialRegion={{
-          latitude: 49.2992,
-          longitude: 19.9496,
-          latitudeDelta: 0.1,
-          longitudeDelta: 0.1,
-        }}
+        initialRegion={INITIAL_REGION}
         onRegionChangeComplete={handleRegionChangeComplete}
         animationEnabled={false}
         preserveClusterPressBehavior={false}
         clusterColor="#2f6fed"
         clusterTextColor="#ffffff"
+        minDelta={0.01}
+        maxDelta={0.1}
       >
         {npcs.map((item) => {
           const lat = Number(item?.latitude);
@@ -104,8 +114,10 @@ export default function MapWithZoom() {
             <Marker
               key={String(item.id)}
               coordinate={{ latitude: lat, longitude: lng }}
-              title={`${item.first_name} ${item.last_name}`}
+              title={`NPC #${item.id}`}
+              description={"Npc"}
               onPress={() => handleMarkerPress(item)}
+              tracksViewChanges={false}
             />
           );
         })}
@@ -123,11 +135,4 @@ export default function MapWithZoom() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   map: { flex: 1 },
-  dot: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  emoji: {
-    fontSize: 22,
-  },
 });

@@ -30,6 +30,16 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
+        name="info"
+        options={{
+          title: "Info",
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons size={28} name="info-outline" color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
         name="civilAI"
         options={{
           title: "CivilAI",
