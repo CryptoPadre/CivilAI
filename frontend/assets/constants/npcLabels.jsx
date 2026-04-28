@@ -58,6 +58,40 @@ export const moralityLines = {
   ],
 };
 
+export const degen_lines = {
+  none: [],
+
+  narcissist: [
+    "Seems strongly focused on personal status.",
+    "Appears highly concerned with reputation.",
+    "Often prioritizes personal recognition.",
+  ],
+
+  sociopath: [
+    "Shows limited concern for social expectations.",
+    "Appears indifferent to community approval.",
+    "Often acts independently of group norms.",
+  ],
+
+  psychopath: [
+    "Displays unusually controlled emotional responses.",
+    "Appears difficult to read emotionally.",
+    "Maintains a distant and calculated presence.",
+  ],
+
+  paranoid: [
+    "Seems unusually cautious of others nearby.",
+    "Frequently scans the surroundings carefully.",
+    "Appears wary of unfamiliar situations.",
+  ],
+
+  pedophile: [
+    "Displays behavior patterns that concern nearby observers.",
+    "Is monitored closely by surrounding communities.",
+    "Appears socially restricted in interactions.",
+  ],
+};
+
 function getLevel(value) {
   if (value <= 33) return "low";
   if (value <= 66) return "medium";
@@ -69,10 +103,18 @@ function randomFrom(arr) {
 }
 
 export function getNpcSummary(npc) {
-  return [
+  const summary = [
     randomFrom(happinessLines[getLevel(npc.happiness_level)]),
     randomFrom(aggressionLines[getLevel(npc.aggression_level)]),
     randomFrom(empathyLines[getLevel(npc.empathy_level)]),
     randomFrom(moralityLines[getLevel(npc.morality_level)]),
-  ].join(" ");
+  ];
+
+  const degen = npc.degenerative_condition;
+
+  if (degen && degen !== "none" && degen_lines[degen]) {
+    summary.push(randomFrom(degen_lines[degen]));
+  }
+
+  return summary.join(" ");
 }
