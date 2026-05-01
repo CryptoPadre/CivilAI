@@ -8,8 +8,8 @@ import NpcCalloutCard from "./NpcCalloutCard";
 const INITIAL_REGION = {
   latitude: 64.1466,
   longitude: -21.9426,
-  latitudeDelta: 1,
-  longitudeDelta: 1,
+  latitudeDelta: Platform.OS === "android" ? 1 : 0.01,
+  longitudeDelta: Platform.OS === "android" ? 1 : 0.01,
 };
 
 const getZoom = (longitudeDelta) => {
@@ -76,7 +76,7 @@ export default function Map() {
 
   const clusterIndex = useMemo(() => {
     const index = new Supercluster({
-      radius: 60,
+      radius: 80,
       maxZoom: 20,
     });
 

@@ -62,13 +62,15 @@ const styles = StyleSheet.create({
     paddingBottom: 80,
   },
   header: {
-    fontFamily: "AcademyEngravedLetPlain",
+    fontFamily:
+      Platform.OS === "IOS" ? "AcademyEngravedLetPlain" : "sans-serif-medium",
     textAlign: "center",
     fontWeight: "bold",
     fontSize: 24,
   },
   text: {
-    fontFamily: "AcademyEngravedLetPlain",
+    fontFamily:
+      Platform.OS === "IOS" ? "AcademyEngravedLetPlain" : "sans-serif-medium",
     fontWeight: "500",
     fontSize: 18,
     marginTop: 40,

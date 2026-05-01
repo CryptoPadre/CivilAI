@@ -161,7 +161,7 @@ class Command(BaseCommand):
         if npc.wealth > npc.salary * 24:
             npc.happiness_level += 15
             npc.stress_level -= 15
-            npc.introuversion_level -= 15
+            npc.introversion_level -= 15
             
 
     # ----------------------------
@@ -229,18 +229,5 @@ class Command(BaseCommand):
                     else:
                         self.social(npc, other)
 
-        # ----------------------------
-        # 5. SAVE (SINGLE DB HIT)
-        # ----------------------------
-        Npc.objects.bulk_update(
-            npcs,
-            [
-                "fitness_level", "intelligence_level", "aggression_level",
-                "happiness_level", "stress_level", "charisma_level",
-                "empathy_level", "morality_level", "health_level",
-                "energy_level", "introversion_level", "creativity_level",
-                "job_level", "salary", "wealth",
-            ]
-        )
 
         self.stdout.write(f"Processed {len(npcs)} NPCs")
